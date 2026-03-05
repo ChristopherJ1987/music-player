@@ -5,7 +5,7 @@
 
 1. [Project Vision](#project-vision)
 2. [Tech Stack](#tech-stack)
-3. [Design System](#tech-stack)
+3. [Design System](#design-system)
 4. [User Flows](#user-flows)
 5. [Component Architecture](#component-architecture)
 6. [File Structure](#file-structure)
@@ -184,6 +184,355 @@ background: linear-gradient(90deg, #F97316 0%, #F59E0B 100%);
 └──────────┴─────────────────────────────────────────┘
 │ [◀][▶] ●═══════════○ [🔊] [Orb Icon] │ ← Playback (80px)
 └────────────────────────────────────────────────────┘
+```
+
+---
+
+### [User Flows](#user-flows)
+
+> Flow 1: First-Time User - Adding Music
+
+1. User opens app (empty state)
+2. User sees all UI elements (sidebar, top bar, main content area, playback bar) 
+   - Main content area shows: "Add Music to Get Started" prompt
+3. User clicks "Add Music Folder" button
+4. OS file picker opens (select folder with music)
+5. App scans folder, reads metadata (music-metadata library)
+6. Shows progress: "Scanning... Found 47 songs"
+7. Library populates in main content area (album art grid)
+8. Success! Sidebar shows "Library" is now active
+
+**`Key Points:`**
+- User can add more music anytime via settings or "+ Add Music" button
+- Music files stay in original locations (app stores files paths)
+- Initial scan reads: title, artists, album, artwork, duration
+
+> Flow 2: Daily Use - Playing Music
+
+1. User opens app (library already loaded)
+2. Main content area shows library (album art grid)
+3. Two interaction paths:
+   - Path A - Browse & Click:
+     - User scrolls library grid in main content area
+     - Clicks album cover
+     - Playback bar loads song info
+     - Now Playing card updates in main content area
+     - Album art displays, music plays
+     - Queue builds (rest of album continues)
+   - Path B: Search:
+     - User types in top search bar
+     - Main content area filters results in real-time
+     - User clicks song from filtered results
+     - Playback bar loads, Now Playing updates
+     - Song plays, search results remain visible
+
+**`Key Points:`**
+- Sidebar (library, genres, playlists) click: Main content area changes
+- Main content area (song, album) click: Playback bar updates
+- Playback bar: Tracks what's playing, what's next in queue
+- Search is instant - no submit button or onClick handling needed
+
+> Flow 3: Creating a Playlist
+
+1. User finds song they want to save
+2. Clicks three-dot menu (⋮) on album card
+3. Context menu appears
+   - Add to Playlist
+   - Go to Album
+   - View Artist
+4. Clicks "Add to Playlist"
+5. Submenu shows:
+   - Existing playlists: "Chill", "Rage"
+   - "+ Create New Playlist"
+6. Clicks existing playlist:
+   - Song added toast notification - "Added to Study Sessions ✓"
+7. Clicks "+ Create New Playlist":
+   - Modal Appears: "Name your playlist"
+   - Types "Study Sessions", clicks Create
+   - New playlist appears in sidebar
+   - Song added to new playlist
+
+**`Key Points:`**
+- Right-click OR three-dot menu (⋮)
+- Quick add to existing playlist
+- Easy playlist creation
+- Visual feedback (toast notifications)
+
+> Flow 4: Visualizer
+
+1. Song playing in playback bar
+2. Frequency orb visible in Now PLaying card (pulsing to beat)
+3. User clicks orb
+4. Fullscreen visualizer overlay fades in
+5. Immersive animation (purple/teal/orange/gold waves)
+6. User presses ESC or clicks background
+7. Returns to normal view, orb still pulsing
+
+---
+
+### [Component Architecture](#component-architecture)
+
+> App Structure
+
+```
+javascript
+
+<App>
+    <TopBar />
+    <div className="main-layout">
+        <Sidebar />
+        <MainContent />
+    </div>
+    <PlaybackBar />
+    {showVisualizer && <Visualizer />}
+</App>
+```
+
+> Component Breakdown
+
+#### TopBar.jsx
+
+```
+javascript
+
+<TopBar>
+    <SearchBar
+        value={searchQuery}
+        onChange={handleSearch}
+    />
+    <SettingsButton
+        onClick={openSettings}
+    />
+<TopBar />
+```
+**`Responsibilities:`**
+- Search input (filters library in real-time)
+- Settings access
+- Always visible
+
+#### Sidebar.jsx
+
+```
+javascript
+
+<SideBar>
+    <Logo /> {/* Beyond binary BB Logo */}
+    <Navigation>
+        <NavItem
+            icon="home"
+            label="Library"
+            active={view === 'library'}
+        />
+        <NavItem
+            icon="music"
+            label="Genres"
+            active={view === 'genres'}
+        />
+    </Navigation>
+    <Divider />
+    <PlaylistSection>
+        <h4>Playlists</h4>
+        {playlists.map(playlist => (
+            <PlaylistItem
+                key={playlist.id} {...playlist}
+            />
+            <Button
+                onClick={createPlaylist}>+ New Playlist
+            </Button>
+        ))}
+    </PlaylistSection>
+</SideBar>
+```
+**`Props:`**
+- currentView (string: 'library', 'genres', 'playlist')
+- playlists (array)
+- onNavigate (function)
+
+**`Responsibilities:`**
+- Navigate between views
+- Show playlists
+- Create new playlists
+
+#### MainContent.jsx
+
+```
+javascript
+
+<MainContent view={currentView}>
+    <NowPlaying track={currentTrack} isPlaying={isPlaying} />
+    {view === 'library' && <LibraryView songs={filteredSongs} />}
+    {view === 'genres' && <GenresView />}
+    {view === 'playlist' && <PlaylistView playlist={activePlaylist} />}
+    {view === 'search' && <SearchResults results= {searchResults} />}
+</MainContent>
+```
+**`Responsibilities:`**
+- Display appropriate view based on sidebar navigation
+- Always show Now Playing card at top
+- Render content grid/list below
+
+#### NowPlaying.jsx
+
+```
+javascript
+
+<NowPlaying track={currentTrack} isPlaying={isPlaying}>
+    <div className="album-art-container">
+        <AlbumArt src={track.artwork} size="large" />
+        {isPlaying && <FrequencyOrb audioData={frequencyData} />}
+    </div>
+    <TrackInfo>
+        <h2 className="font-bitcount">{track.title}</h2>
+        <p>{track.artist}</p>
+        <p className="muted">{track.album}</p>
+    </TrackInfo>
+</NowPlaying>
+```
+**`Features:`**
+- Large album art (300x300px)
+- Frequency orb overlay when playing
+- Gradient border (purple → teal)
+- Click orb → Fullscreen visualizer
+
+#### LibraryView.jsx
+
+```
+javascript
+
+<LibraryView songs={songs}>
+    <ViewToggle mode={viewMode} onChange={setViewMode} />
+    {viewMode === 'grid' ? (
+        <AlbumGrid songs={songs} onPlay={handlePlay} />
+    ) : (
+        <SongList songs={songs} onPlay={handlePlay} />
+    )}
+</LibraryView>
+```
+**`Grid View:`**
+- 5 columns of album art
+- 180x180px thumbnails
+- Hover: Ornage glow,lift effect
+
+#### AlbumCard.jsx (reusable)
+
+```
+javascript
+
+<AlbumCard song={song} onClick={handlePlay}>
+    <AlbumArt src={song.artwork} size="medium" />
+    <SongInfo>
+        <h4>{song.title}<h4>
+        <p>{song.artist}</p>
+        <p classname="muted">{song.title}</p>
+    </SongInfo>
+    <ContextMenuButton onClick={openMenu} />
+</AlbumCard>
+```
+**`Hover Effects:`**
+- Orange border glow
+- Slight elevation
+- Play button overlay
+
+
+#### Playbackbar.jsx
+
+```
+javascript
+
+<PlaybackBar>
+    <TrackThumbnail src={currentTrack.artwork} />
+    <Trackinfo mini>
+        {currentTrack.title } • {currentTrack.artist}
+    </TrackInfo>
+    <Controls>
+        <Button icon="skip-back" onClick={previousTrack} />
+        <Button icon={isPlaying ? "pause" : "play"} onClick-{togglePlay} />
+        <Button icon="skip-forward" onClick={nextTrack} />
+    </Controls>
+    <ProgressBar current={currentTime} duration={duration} onChange={seek} />
+    <VolumeControl value={volume} onChange={setVolume} />
+    <VisualizerToggle onClick={toggleFullscreenVisualizer} />
+</Playbackbar>
+```
+**`Responsibilities:`**
+- Playback controls
+- Progress tracking
+- Volume
+- Queue Management (internal)
+- Visualizer toggle
+
+#### Visualizer.jsx
+
+```
+javascript
+
+<Visualizer isActive={showFullscreen} audioElement={audioRef.current} onClose={handleClose}>
+    <Canvas draw={drawFrequencyOrb} audioData={frequencyData} />
+</Visualizer>
+```
+
+**`Technical Implementation`**
+- HTML5 Canvas
+- Web Audio API `AnalyserNode`
+- Reads frequency data from playing audio
+- Draws animated orb with waves
+- Purple/teal/orange/gold gradient
+- Pulsates with beat
+
+---
+
+### [File Structure](#file-structure)
+
+```
+music-player/
+├── src/
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── App.jsx
+│   │   │   ├── TopBar.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── MainContent.jsx
+│   │   │   └── PlaybackBar.jsx
+│   │   ├── music/
+│   │   │   ├── NowPlaying.jsx
+│   │   │   ├── LibraryView.jsx
+│   │   │   ├── AlbumCard.jsx
+│   │   │   ├── AlbumGrid.jsx
+│   │   │   └── SongList.jsx
+│   │   ├── player/
+│   │   │   ├── Controls.jsx
+│   │   │   ├── ProgressBar.jsx
+│   │   │   ├── VolumeControl.jsx
+│   │   │   └── Visualizer.jsx
+│   │   └── ui/
+│   │       ├── Modal.jsx
+│   │       ├── ContextMenu.jsx
+│   │       ├── Button.jsx
+│   │       └── EmptyState.jsx
+│   ├── hooks/
+│   │   ├── useAudio.js        # Audio playback logic
+│   │   ├── useLibrary.js      # Load/scan music files
+│   │   ├── usePlaylists.js    # Playlist management
+│   │   └── useVisualizer.js   # Audio analysis
+│   ├── context/
+│   │   ├── MusicContext.jsx   # Global music state
+│   │   └── PlayerContext.jsx  # Playback state
+│   ├── utils/
+│   │   ├── fileScanner.js     # Scan folders for music
+│   │   ├── metadata.js        # Read MP3 tags
+│   │   └── storage.js         # Save/load JSON data
+│   ├── styles/
+│   │   └── globals.css        # Tailwind + custom CSS
+│   ├── App.jsx
+│   └── main.jsx
+├── public/
+│   └── fonts/
+│       ├── Bitcount.woff2
+│       └── Inter.woff2
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+└── README.md
 ```
 
 ---
