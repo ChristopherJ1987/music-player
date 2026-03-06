@@ -537,3 +537,96 @@ music-player/
 
 ---
 
+### [Getting Started](#getting-started)
+
+> Initial Setup
+
+```
+bash# Create React app with Vite
+npm create vite@latest music-player -- --template react
+```
+
+cd music-player
+
+> Install Dependencies
+
+```
+npm install
+```
+
+> Install additional packages
+
+```
+npm install music-metadata lucide-react
+```
+
+> Install Tailwind CSS
+
+```
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+> Run dev server
+
+```
+npm run dev
+```
+
+> Tailwind Configuration
+
+```
+javascript
+//tailwind.config.js
+    export default {
+        content: [
+            "./index.html",
+            "./src.**/*.{js,ts,jsx,tsx}",
+        ],
+        theme: {
+            extend: {
+                colors: {
+                    'primary-purple': '#8B5CF6',
+                    'dark-purple': '#6D28D9',
+                    'secondary-teal': '#14B8A6',
+                    'accent-orange': '#F97316',
+                    'bg-dark': '#0F0F0F',
+                    'surface-dark': '#1A1A1A',
+                    'graphite': '#2D2D2D',
+                },
+                fontFamily: {
+                    'bitcount': ['Bitcount Mono Pixel', 'monospace'],
+                    'sans': ['Inter', 'sans-serif'],
+                },
+            },
+        },
+        plugins: [],
+    }
+```
+
+> Import Fonts
+
+```
+css
+/* src/styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+sans:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --gradient-hero: linear-gradient(135deg, #8B5CF6 0%, #14B8A6 100%);
+    -gradient-accent: linear-gradient(90deg, #F97316 0%, #F59E0B 100%);
+}
+
+body {
+    background-color: #0F0F0F;
+    color: #F5F5F5;
+    font-family: 'Inter', sans-serif;
+}
+```
+
+---
+
