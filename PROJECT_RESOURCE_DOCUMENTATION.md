@@ -207,6 +207,8 @@ background: linear-gradient(90deg, #F97316 0%, #F59E0B 100%);
 - Music files stay in original locations (app stores files paths)
 - Initial scan reads: title, artists, album, artwork, duration
 
+<br>
+
 > Flow 2: Daily Use - Playing Music
 
 1. User opens app (library already loaded)
@@ -231,6 +233,8 @@ background: linear-gradient(90deg, #F97316 0%, #F59E0B 100%);
 - Main content area (song, album) click: Playback bar updates
 - Playback bar: Tracks what's playing, what's next in queue
 - Search is instant - no submit button or onClick handling needed
+
+<br>
 
 > Flow 3: Creating a Playlist
 
@@ -257,6 +261,8 @@ background: linear-gradient(90deg, #F97316 0%, #F59E0B 100%);
 - Quick add to existing playlist
 - Easy playlist creation
 - Visual feedback (toast notifications)
+
+<br>
 
 > Flow 4: Visualizer
 
@@ -753,5 +759,108 @@ function AlbumCard({ song }) {
 }
 ```
 
+> State Flow Diagram
+
+*`Sideabar click`* → *`MusicContext.setCurrentView`* → *`MainContent re-renders`*
+
+*`Search input`* → *`MusicContext.setSearchQuery`* → *`filteresSongs updates`* → *`LibraryView re-renders`*
+
+*`AlbumCard click`* → *`PlayerContext.play(song)`* → *`PlaybarBar updates`* → *`NowPlaying updates`*
+
+**`Key Principles:`**
+- State flows from parent contexts down to child components via hooks.
+
 ---
 
+### [Next Steps](#next-steps)
+
+> Week 1: Core Structure
+
+- Day 1-2: Setup & Layout
+  - Create Vite React app
+  - Set up Tailwind CSS
+  - Create Basic Layout (TopBar, Sidebar, MainContent, PlaybackBar)
+  - Add placeholder content
+
+- Day 3-4: Context & State
+  - Implement MusicContext
+  - Implement PlayerContext
+  - Wire up navigation (sidebar → main content)
+
+- Day 5-7: Library & Playback
+  - Build file scanner (select folder, read music files)
+  - Use music-metadata to read MP3 tags
+  - Display Library grid
+  - Implement basic audio playback (HTML5 Audio)
+
+>Week 2: Features & Polish
+
+- Day 8-10: Search & Playlists
+  - Real-time search filtering
+  - Create playlist functionality
+  - Context menu (add to playlist)
+  - Playlist view
+
+- Day 11-12: UI Polish
+  - Gradients, hover effects
+  - Album art display
+  - Empty states
+  - Loading states
+
+- Day 13-14: Playback Controls
+  - Progress bar (seek)
+  - Volume Control
+  - Next/previous track
+  - Queue management
+
+> Week 3: Electron Wrapper
+
+- Day 15-17: Desktop App
+  - Install Electron
+  - Configure Electron main process
+  - Package web app for desktop
+  - Add native file picker (instead of web input)
+
+- Day 18-19: Testing & Bug Fixes
+  - Test on Mac
+  - Fix edge cases
+  - Performance optimization
+
+- Day 20-12: Polish & Documentation
+  - Final UI tweaks
+  - Write README
+  - Polish Github repository
+  - First release!
+
+> Phase 2 (Future): Visualizer
+
+- Implement Web Audio API AnalyserNode
+- Create Canvas-based frequency orb
+- Fullscreen visualizer mode
+- Purple/teal/orange/gold gradients
+
+> Phase 3 (Optional) Streaming
+
+- Research Youtube streaming integration
+- Implement as optional toggle
+- Keep local playback as primary
+
+---
+
+**`Resources:`**
+
+> Documentation
+
+```
+React: https://react.dev
+Tailwind CSS: https://tailwindcss.com
+Electron: https://electronjs.org
+Web Audio API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+```
+
+> Libraries
+
+```
+music-metadata: https://github.come/homebrew/borewit/music-metadata
+lucide-react: https://lucide.dev
+```
