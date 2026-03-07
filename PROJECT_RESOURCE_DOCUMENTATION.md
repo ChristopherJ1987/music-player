@@ -630,3 +630,128 @@ body {
 
 ---
 
+### [State Management Strategy](#state-management-strategy)
+
+*`Global State (React Context)`*
+
+Here's how to share state across components:
+
+```
+export function MusicProvider({children}) {
+
+    const [library, setLibrary] = useState([]);
+    const [playlists, setPlaylists] = useState([]);
+    const [currentView, setCurrentView] = useState('library');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filtered songs based on search
+    const filteredSongs = library.filter(song => 
+        song.title.toLowerCase().includes(searchQuery.toLowerCase()) || song.artist.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+        <MusicContext.Provider value={{
+            library,
+            setLibrary,
+            playlists,
+            setPlaylists,
+            currentView,
+            setCurrentView,
+            serachQuery,
+            setSearchQuery,
+            filteredSongs,
+        }}>
+            {children}
+        </MusicContext.Provider>
+    );
+}
+
+export const useMusic = () => useContext(MusicContext);
+```
+
+Usage in components:
+
+```
+javascript
+
+function LibraryView() {
+    const { filteredSongs } = useMusic();
+
+    return (
+        <div>
+            {filteredSongs.map(song => (
+                <AlbumCard key={song.id} song={song} />
+            ))}
+        </div>
+    );
+}
+```
+
+PlayerContext.jsx - Playback State
+
+```
+javascript
+
+const PlayerContext = createContext();
+
+export function PlayerProvider({ children }) {
+    const audioRef = useRef(newAudion());
+    const [currentTrack, setCurrentTrack] = uSeState(null);
+    const [isPlaying, setIsPLaying] = useState(false);
+    const [queue, setQueue] = useState([]);
+    const [volume, setVolume] = useState(75);
+
+    const play = (track) => {
+        audioRef.current.src = track.filePath;
+        audioRef.current.play();
+        setCurrentTrack(track);
+        setIsPlaying(true);
+    };
+
+    const pause = () => {
+        audioRef.current.pause();
+        setIsPlaying(false);
+    };
+
+    const togglePlay = () => {
+        if (isPlaying) pause();
+        else audioRef.current.play();
+    };
+
+    return (
+        <PlayerContext.provider value={{
+            currentTrack,
+            isPlaying,
+            queue,
+            volume,
+            play,
+            pause,
+            togglePlay,
+            audioref,
+        }}>
+            {children}
+        </PlayerContext.Provider>
+    );
+}
+
+export const useplayer = () => useContext(PlayerContext);
+```
+
+Usage:
+
+```
+javascript
+
+function AlbumCard({ song }) {
+    const { play } = usePlayer();
+
+    return (
+        <div onClick={() => play(song)}>
+            {/* Card content */}
+        </div>
+    );
+}
+```
+
+---
+
