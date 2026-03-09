@@ -1,4 +1,5 @@
-import { createContext, useContext, useState,useRef, useEffect } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useRef, useEffect } from "react";
 
 const PlayerContext = createContext();
 
@@ -71,7 +72,7 @@ export function PlayerProvider({ children }) {
     const playNext = () => {
         if (queue.length === 0) return
 
-        const currentIndex = queue.findIndex(song => song.id === currentTack?.id);
+        const currentIndex = queue.findIndex(song => song.id === currentTrack?.id);
         const nextIndex = (currentIndex + 1) % queue.length;
         play(queue[nextIndex],queue);
     }
