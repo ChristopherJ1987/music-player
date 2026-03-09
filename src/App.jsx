@@ -4,6 +4,7 @@ import MainContent from './components/layout/MainContent';
 import PlaybackBar from './components/layout/PlaybackBar';
 
 function App() {
+
   return (
     <div className='h-screen flex flex-col bg-bg-dark text-cream-text'>
       <TopBar />
