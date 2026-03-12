@@ -1,9 +1,11 @@
 import { useMusic } from '../../context/MusicContext';
-import { pickMusicFolder, scanAudioFiles } from '../../utilities/filescanner';
+import { usePlayer } from '../../context/PlayerContext';
+import { pickMusicFolder, scanAudioFiles } from '../../utilities/fileScanner';
 import { useState } from 'react';
 
 function MainContent() {
     const { currentView, filteredSongs, playlists } = useMusic();
+    const { currentTrack, isPlaying } = usePlayer();
 
     const renderView = () => {
         if (currentView === 'library') {
@@ -14,7 +16,7 @@ function MainContent() {
             const playlistId = currentView.replace('playlist-', '');
             const playlist = playlists.find(p => p.id === playlistId);
             return <PlaylistView playlist={playlist} />
-        };
+        }
     }
 
     return (
@@ -26,17 +28,30 @@ function MainContent() {
                     <div className="flex items-center gap-6">
 
                         {/* Album Art Placeholder */}
-                        <div className="w-72 h-72 bg-gradient-hero rounded-lg flex items-center justify-center">
-                            <span className="text-6xl">...</span>
+                        <div className="w-72 h-72 bg-gradient-hero rounded-lg flex items-center justify-center overflow-hidden relative">
+                            {currentTrack?.artwork ? (
+                                <img
+                                    src={currentTrack.artwork}
+                                    alt={currentTrack.album}
+                                    className='w-full h-full object-cover'
+                                />
+                            ) : (
+                                <span className="text-6xl">...</span>
+                            )}
+                            {isPlaying && (
+                                <div className='absolute bottom-4 right-4 bg-primary-purple text-cream-text px-3 py-1 rounded-full text-sm'>
+                                    Playing ♪
+                                </div>
+                            )}
                         </div>
 
                         {/* Track Info */}
                         <div className="flex-1">
                             <h2 className="font-bitcount text-4xl text-cream-text mb-2">
-                                Song Title
+                                {currentTrack?.title || 'No song playing'}
                             </h2>
-                            <p className="text-xl text-muted-text mb-1">Artist Name</p>
-                            <p className="text-lg text-muted-text">Album Name</p>
+                            <p className="text-xl text-muted-text mb-1">{currentTrack?.artist || 'Select a song to play'}</p>
+                            <p className="text-lg text-muted-text">{currentTrack?.album || ''}</p>
                         </div>
 
                     </div>
@@ -50,6 +65,7 @@ function MainContent() {
     
 function LibraryView({ songs }) {
     const { addSongsToLibrary } = useMusic();
+    const { play } = usePlayer();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
 
@@ -82,6 +98,10 @@ function LibraryView({ songs }) {
             setIsScanning(false)
             alert('Error adding music. Check console for details.')
         }
+    }
+
+    const handlePlaySong = (song) => {
+        play(song,songs)
     }
 
     return (
@@ -124,8 +144,9 @@ function LibraryView({ songs }) {
                     {songs.map((song) => (
                         <div
                             key={song.id}
+                            onClick={() => handlePlaySong(song)}
                             className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'>
-                            <div className='aspect-square rounded-lg mb-3 flex items-center justify-center overflow:hidden bg-gradient-accent'>
+                            <div className='aspect-square rounded-lg mb-3 flex items-center justify-center overflow-hidden bg-gradient-accent relative'>
                                 {song.artwork ? (
                                     <img
                                         src={song.artwork}
@@ -134,6 +155,9 @@ function LibraryView({ songs }) {
                                 ) : (
                                     <span className='text-4xl'>🎵</span>
                                 )}
+                                <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
+                                    <span className='text-5xl'>▶️</span>
+                                </div>
                             </div>
                             <h4 className='text-sm font-semibold text-cream-text truncate'>
                                 {song.title || 'Unknown Song'}

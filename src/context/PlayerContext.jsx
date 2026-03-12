@@ -1,10 +1,23 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useRef, useEffect } from "react";
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
 
 const PlayerContext = createContext();
 
 export function PlayerProvider({ children }) {
-    const audioRef = useRef(new Audio());
+    const audioRef = useRef(null)
+
+    useEffect(() => {
+        const audio = new Audio()
+        audio.preload = 'metadata'
+        audioRef.current = audio
+        document.body.appendChild(audio)
+
+        return () => {
+            if (audio.parentNode) {
+                document.body.removeChild(audio)
+            }
+        }
+    }, []);
 
     const [currentTrack, setCurrentTrack] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -14,7 +27,9 @@ export function PlayerProvider({ children }) {
     const [volume, setVolume] = useState(75);
 
     useEffect(() => {
-        audioRef.current.volume - volume / 100
+        if (audioRef.current) {
+            audioRef.current.volume = volume / 100
+        }
     }, [volume]);
 
     useEffect(() => {
@@ -24,7 +39,7 @@ export function PlayerProvider({ children }) {
         const handleDurationChange = () => setDuration(audio.duration);
         const handleEnded = () => {
             setIsPlaying(false);
-            PlayerContext();
+            playNext();
         }
 
         audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -74,14 +89,14 @@ export function PlayerProvider({ children }) {
 
         const currentIndex = queue.findIndex(song => song.id === currentTrack?.id);
         const nextIndex = (currentIndex + 1) % queue.length;
-        play(queue[nextIndex],queue);
+        play(queue[nextIndex], queue);
     }
 
     const playPrevious = () => {
         if (queue.length === 0) return
 
         const currentIndex = queue.findIndex(song => song.id === currentTrack?.id);
-        const prevIndex = currentIndex === 0 ? queue.length - 1 : currentIndex - 1;
+        const prevIndex = currentIndex === 0 ? queue.length - 1 : currentIndex -1;
         play(queue[prevIndex], queue);
     }
 
@@ -107,11 +122,12 @@ export function PlayerProvider({ children }) {
         audioRef,
     }
 
-    return (
-        <PlayerContext.Provider value={ value }>
-            { children }
+    return(
+        <PlayerContext.Provider value={value}>
+            {children}
         </PlayerContext.Provider>
     )
+
 }
 
 export function usePlayer() {
