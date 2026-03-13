@@ -4,7 +4,7 @@ import { pickMusicFolder, scanAudioFiles } from '../../utilities/fileScanner';
 import { useState } from 'react';
 
 function MainContent() {
-    const { currentView, filteredSongs, playlists } = useMusic();
+    const { currentView, filteredSongs, playlists, searchQuery } = useMusic();
     const { currentTrack, isPlaying } = usePlayer();
 
     const renderView = () => {
@@ -64,7 +64,7 @@ function MainContent() {
 }
     
 function LibraryView({ songs }) {
-    const { addSongsToLibrary } = useMusic();
+    const { addSongsToLibrary, searchQuery } = useMusic();
     const { play } = usePlayer();
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
@@ -107,7 +107,14 @@ function LibraryView({ songs }) {
     return (
         <div>
             <div className='flex items-center justify-between mb-4'>
-                <h3 className='text-2xl font-semibold text-cream-text mb-4'>Library</h3>
+                <h3 className='text-2xl font-semibold text-cream-text mb-4'>
+                    Library
+                    {searchQuery && (
+                        <span className='text-sm text-muted-text ml-3'>
+                            {songs.length} {songs.length === 1 ? 'result' : 'results'}
+                        </span>
+                    )}
+                </h3>
                 <button
                     onClick={handleAddMusic}
                     disabled={isScanning}

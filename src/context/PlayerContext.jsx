@@ -32,6 +32,7 @@ export function PlayerProvider({ children }) {
         }
     }, [volume]);
 
+    
     useEffect(() => {
         const audio = audioRef.current;
 
