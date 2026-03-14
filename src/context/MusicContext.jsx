@@ -11,7 +11,7 @@ export function MusicProvider({ children }) {
 
     const filteredSongs = library.filter(song =>
         song.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        song.srtist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        song.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         song.album?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -35,6 +35,13 @@ export function MusicProvider({ children }) {
         ));
     };
 
+    const removeFromPlaylist = (playlistId, songId) => {
+        setPlaylists(prev => prev.map(playlist =>
+            playlist.id === playlistId
+                ? { ...playlist, songs: playlist.songs.filter(song => song.id !== songId) } : playlist
+        ))
+    }
+
     const value = {
         library,
         playlists,
@@ -47,6 +54,7 @@ export function MusicProvider({ children }) {
         addSongsToLibrary,
         createPlaylist,
         addToPlaylist,
+        removeFromPlaylist,
     }
 
     return (
