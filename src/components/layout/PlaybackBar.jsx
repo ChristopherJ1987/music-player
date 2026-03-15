@@ -7,11 +7,15 @@ function PlaybackBar() {
         currentTime,
         duration,
         volume,
+        isShuffle,
+        repeatMode,
         togglePlay,
         playNext,
         playPrevious,
         seek,
         setVolume,
+        toggleShuffle,
+        toggleRepeat,
     } = usePlayer();
 
     const formatTime = (seconds) => {
@@ -62,6 +66,14 @@ function PlaybackBar() {
             <div className='flex-1 flex flex-col items-center gap-2 max-w-2xl'>
                 <div className='flex items-center gap-6'>
                     <button
+                        onClick={toggleShuffle}
+                        disabled={!currentTrack}
+                        className={`text-xl transition disabled:opacity-30 disabled:cursor-not-allowed ${isShuffle ? 'text-primary-purple' : 'text-muted-text hover:text-cream-text'}`}
+                        title={isShuffle ? 'Shuffle on' : 'Shuffle off'}
+                    >
+                        🔀
+                    </button>
+                    <button
                         onClick={playPrevious}
                         disabled={!currentTrack}
                         className='text-2xl text-muted-text hover:text-cream-text transition disabled:opacity-30 disabled:cursor-not-allowed'>
@@ -78,6 +90,14 @@ function PlaybackBar() {
                         disabled= {!currentTrack}
                         className='text-2xl text-muted-text hover:text-cream-text transition disabled:opacity-30 disabled:cursor-not-allowed'>
                             ⏭
+                    </button>
+                    <button
+                        onClick={toggleRepeat}
+                        disabled={!currentTrack}
+                        className={`text-xl transition disabled:opacity-30 disabled:cursor-not-allowed ${repeatMode !== 'off' ? 'text-primary-purple' : 'text-muted-text hover:text-cream-text'}`}
+                        title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'all' ? 'Repeat all' : 'Repeat one'}
+                    >
+                        {repeatMode === 'one' ? '🔂' : '🔁'}
                     </button>
                 </div>
                 <div className='w-full flex items-center gap-2'>
