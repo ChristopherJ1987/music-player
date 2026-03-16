@@ -23,6 +23,7 @@ function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 p-4">
                 <div className="space-y-2">
+
                     <button 
                         onClick={() => setCurrentView('library')}
                         className={`w-full px-4 py-2 rounded-lg text-left transition ${
@@ -35,6 +36,13 @@ function Sidebar() {
                     </button>
 
                     <button
+                        onClick={() => setCurrentView('albums')}
+                        className={`w-full px-4 py-2 rounded-lg text-left transition ${currentView === 'albums' ? 'text-primary-purple bg-primary-purple/10' : 'text-muted-text hover:text-cream-text'}`}
+                    >
+                        💿 Albums
+                    </button>
+
+                    <button
                         onClick={() => setCurrentView('genres')}
                         className={`w-full px-4 py-2 rounded-lg text-left transition ${
                             currentView === 'genres'
@@ -44,6 +52,7 @@ function Sidebar() {
                     >
                         🎵 Genres
                     </button>
+
                 </div>
 
                 {/* Playlists Section */}

@@ -12,12 +12,17 @@ function MainContent() {
     const renderView = () => {
         if (currentView === 'library') {
             return <LibraryView songs={filteredSongs} />
+        } else if (currentView === 'albums') {
+            return <AlbumsView />
         } else if (currentView === 'genres') {
             return <GenresView />
         } else if (currentView.startsWith('playlist-')) {
             const playlistId = currentView.replace('playlist-', '');
             const playlist = playlists.find(p => p.id === playlistId);
             return <PlaylistView playlist={playlist} />
+        } else if (currentView.startsWith('album-')) {
+            const albumName = decodeURIComponent(currentView.replace('album-', ''));
+            return <AlbumDetailView albumName={albumName} />
         }
     }
 
@@ -422,6 +427,240 @@ function PlaylistView({ playlist }) {
 
         </div>
     )
+}
+
+function AlbumsView() {
+    const { albums, setCurrentView } = useMusic();
+    const [sortBy, setSortBy] = useState('name');
+
+    const sortedAlbums = [...albums].sort((a, b) => {
+        if (sortBy === 'name') {
+            return a.name.localeCompare(b.name);
+        } else {
+            return a.artist.localeCompare(b.artist);
+        }
+    });
+
+    const handleAlbumClick = (albumName) => {
+        setCurrentView(`album-${encodeURIComponent(albumName)}`);
+    };
+
+    return (
+        <div>
+            <div className='flex items-center justify-between mb-4'>
+                <h3 className='text-2xl font-semibold text-cream-text'>
+                    Albums
+                    <span className='text-sm text-muted-text ml-3'>
+                        {albums.length} {albums.length === 1 ? 'album' : 'albums'}
+                    </span>
+                </h3>
+
+                <div className='flex gap-2'>
+                    <button
+                        onClick={() => setSortBy('name')}
+                        className={`px-4 py-2 rounded-lg transition ${sortBy === 'name' ? 'bg-primary-purple text-cream-text' : 'bg-surface-dark text-muted-text hover:text-cream-text'}`}
+                    >
+                        By Album
+                    </button>
+                    <button
+                        onClick={() => setSortBy('artist')}
+                        className={`px-4 py-2 rounded-lg transition ${sortBy === 'artist' ? 'bg-primary-purple text-cream-text' : 'bg-surface-dark text-muted-text hover:text-cream-text'}`}
+                    >
+                        By Artist
+                    </button>
+                </div>
+            </div>
+
+            {albums.length === 0 ? (
+                <div className='text-center py-12'>
+                    <p className='text-4xl mb-4'>💿</p>
+                    <p className='text-xl text-muted-text mb-2'>No albums yet</p>
+                    <p className='text-sm text-muted-text'>Add music to see albums</p>
+                </div>
+            ) : (
+                <div className='grid grid-cols-4 gap-6'>
+                    {sortedAlbums.map((album, index) => (
+                        <div
+                            key={index}
+                            onClick={() => handleAlbumClick(album.name)}
+                            className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'>
+                            <div className='aspect-square rounded-lg mb-3 overflow-hidden bg-gradient-accent relative'>
+                                {album.artwork ? (
+                                    <img
+                                        src={album.artwork}
+                                        alt={album.name}
+                                        className='w-full h-full object-cover' />
+                                ) : (
+                                    <div className='w-full h-full flex items-center justify-center text-6xl'>
+                                        💿
+                                    </div>
+                                )}
+                                <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
+                                    <span className='text-6xl'>▶️</span>
+                                </div>
+                            </div>
+                            <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
+                                {album.name}
+                            </h4>
+                            <p className='text-sm text-muted-text truncate mb-1'>
+                                {album.artist}
+                            </p>
+                            <p className='text-sm text-muted-text'>
+                                {album.songs.length} {album.songs.length === 1 ? 'song' : 'songs'}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function AlbumDetailView({ albumName }) {
+    const { albums } = useMusic();
+    const { play } = usePlayer();
+    const [contextMenu, setContextMenu] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    const album = albums.find(a => a.name === albumName);
+
+    if (!album) {
+        return (
+            <div className='text-center py-12'>
+                <p className='text-xl text-muted-text'>Album not found</p>
+            </div>
+        );
+    }
+
+    const handlePlaySong = (song) => {
+        play(song, album.songs);
+    };
+
+    const handlePlayAlbum = () => {
+        if (album.songs.length > 0) {
+            play(album.songs[0], album.songs);
+        }
+    };
+
+    const handleRightClick = (e, song) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            song: song
+        });
+    };
+
+    return (
+        <div>
+            <div className='flex items-center gap-6 mb-8 bg-surface-dark p-6 rounded-xl'>
+                <div className='w-48 h-48 rounded-lg overflow-hidden bg-gradient-accent flex-shrink-0'>
+                    {album.artwork ? (
+                        <img
+                            src={album.artwork}
+                            alt={album.name}
+                            className='w-full h-full object-cover'
+                        />
+                    ) : (
+                        <div className='w-full h-full flex items-center justify-center text-8xl'>
+                            💿
+                        </div>
+                    )}
+                </div>
+
+                <div className='flex-1'>
+                    <p className='text-sm text-muted-text uppercase tracking-wide mb-2'>Album</p>
+                    <h2 className='font-bitcount text-4xl text-cream-text mb-3'>
+                        {album.name}
+                    </h2>
+                    <p className='text-xl text-muted-text mb-4'>{album.artist}</p>
+                    <p className='text-sm text-muted-text mb-4'>
+                        {album.songs.length} {album.songs.length === 1 ? 'song' : 'songs'}
+                    </p>
+
+                    <button
+                        onClick={handlePlayAlbum}
+                        className='bg-gradient-hero text-cream-text px-8 py-3 rounded-lg hover:opacity-80 transition text-lg font-semibold'>
+                            ▶ Play Album
+                        </button>
+                </div>
+            </div>
+
+            <div className='space-y-2'>
+                {album.songs.map((song, i) => (
+                    <div
+                        key={song.id || i}
+                        onClick={() => handlePlaySong(song)}
+                        onContextMenu={(e) => handleRightClick(e, song)}
+                        className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer flex items-center gap-4 group relative'>
+                        <span className='text-muted-text min-w-[30px]'>
+                            {i + 1}
+                        </span>
+
+                        <div className='w-12 h-12 rounded overflow-hidden bg-gradient-accent flex items-center justify-center'>
+                            {song.artwork ? (
+                                <img src={song.artwork} alt={song.album} className='w-full h-full object-cover' />
+                            ) : (
+                                <span>...</span>
+                            )}
+                        </div>
+
+                        <div className='flex-1 min-w-0'>
+                            <p className='text-cream-text font-semibold truncate'>{song.title}</p>
+                            <p className='text-sm text-muted-text truncate'>{song.artist}</p>
+                        </div>
+
+                        <span className='text-sm text-muted-text'>
+                            {song.duration ? `${Math.floor(song.duration / 60)}:${String(Math.floor(song.duration % 60)).padStart(2, '0')}` : '--:--'}
+                        </span>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setContextMenu({
+                                    x: rect.left - 210,
+                                    y: rect.top,
+                                    song:song
+                                });
+                            }}
+                            className='w-8 h-8 flex items-center justify-center text-muted-text hover:text-cream-text opacity-0 group-hover:opacity-100 transition'>
+                                ⋮
+                            </button>
+                    </div>
+                ))}
+            </div>
+
+            {contextMenu && (
+                <ContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onClose={() => setContextMenu(null)}
+                >
+                    <ContextMenuItem
+                        onClick={() => {
+                            const { addToPlaylist, playlists, createPlaylist } = useMusic();
+                            setContextMenu(null);
+                        }}
+                        icon='➕'
+                    >
+                        Add to Playlist
+                    </ContextMenuItem>
+                    <ContextMenuDivider />
+                    <ContextMenuItem icon='🎤'>
+                        Go to Artist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={() => setToast(null)}
+                />
+            )}
+        </div>
+    );
 }
 
 export default MainContent;

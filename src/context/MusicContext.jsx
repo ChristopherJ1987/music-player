@@ -15,6 +15,22 @@ export function MusicProvider({ children }) {
         song.album?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const albumsMap = library.reduce((acc, song) => {
+        const albumKey = song.album || 'Unknown Album';
+        if (!acc[albumKey]) {
+            acc[albumKey] = {
+                name: albumKey,
+                artist: song.albumArtist || song.artist || 'Unknown Artist',
+                artwork: song.artwork || null,
+                songs: []
+            };
+        }
+        acc[albumKey].songs.push(song);
+        return acc;
+    }, {});
+
+    const albums = Object.values(albumsMap);
+
     const addSongsToLibrary = (songs) => {
         setLibrary(prevLibrary => [...prevLibrary, ...songs])
     };
@@ -48,6 +64,7 @@ export function MusicProvider({ children }) {
         currentView,
         searchQuery,
         filteredSongs,
+        albums,
         setLibrary,
         setCurrentView,
         setSearchQuery,
