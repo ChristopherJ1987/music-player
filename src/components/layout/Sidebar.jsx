@@ -1,4 +1,5 @@
 import { useMusic } from '../../context/MusicContext';
+import { Plus } from 'lucide-react';
 
 function Sidebar() {
     const { currentView, setCurrentView, playlists, createPlaylist } = useMusic();
@@ -77,9 +78,10 @@ function Sidebar() {
 
                         <button
                             onClick={handleCreatePlaylist}
-                            className='w-full px-4 py-2 text-left text-muted-text hover:text-primary-purple transition'
+                            className='w-full px-4 py-2 text-left text-muted-text hover:text-primary-purple transition flex items-center gap-3'
                         >
-                            + New Playlist
+                            <Plus size={20} />
+                            <span>New Playlist</span>
                         </button>                        
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { pickMusicFolder, scanAudioFiles } from '../../utilities/fileScanner';
 import { useState } from 'react';
 import ContextMenu, { ContextMenuItem, ContextMenuDivider } from '../ui/ContextMenu';
 import Toast from '../ui/Toast';
+import { MoreVertical, Play as PlayIcon, Play, Disc3, Mic2, Radio, ListMusic, Music } from 'lucide-react';
 
 
 function MainContent() {
@@ -47,7 +48,7 @@ function MainContent() {
                                     className='w-full h-full object-cover'
                                 />
                             ) : (
-                                <span className="text-6xl">...</span>
+                                <Music size={64} className='text-muted-text' strokeWidth={1.5} />
                             )}
                             {isPlaying && (
                                 <div className='absolute bottom-4 right-4 bg-primary-purple text-cream-text px-3 py-1 rounded-full text-sm'>
@@ -167,7 +168,7 @@ function AlbumsView() {
 
             {albums.length === 0 ? (
                 <div className='text-center py-12'>
-                    <p className='text-4xl mb-4'>💿</p>
+                    <Disc3 size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
                     <p className='text-xl text-muted-text mb-2'>No albums yet</p>
                     <p className='text-sm text-muted-text'>Add music to see albums</p>
                     <br />
@@ -191,12 +192,14 @@ function AlbumsView() {
                                         alt={album.name}
                                         className='w-full h-full object-cover' />
                                 ) : (
-                                    <div className='w-full h-full flex items-center justify-center text-6xl'>
-                                        💿
+                                    <div className='w-full h-full flex items-center justify-center'>
+                                        <Disc3 size={48} className='text-muted-text' strokeWidth={1.5} />
                                     </div>
                                 )}
                                 <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
-                                    <span className='text-6xl'>▶️</span>
+                                    <div className='w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center'>
+                                        <PlayIcon size={32} className='text-white ml-1' />
+                                    </div>
                                 </div>
                             </div>
                             <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
@@ -240,7 +243,7 @@ function ArtistsView() {
 
             {artists.length === 0 ? (
                 <div className='text-center py-12'>
-                    <p className='text-4xl mb-4'>🎤</p>
+                    <Mic2 size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
                     <p className='text-xl text-muted-text mb-2'>No artists yet</p>
                     <p className='text-sm text-muted-text'>Add music to see artists</p>
                 </div>
@@ -258,12 +261,14 @@ function ArtistsView() {
                                         alt={artist.name}
                                         className='w-full h-full object-cover' />
                                 ) : (
-                                    <div className='w-full h-full flex items-center justify-center text-6xl'>
-                                        🎤
+                                    <div className='w-full h-full flex items-center justify-center'>
+                                        <Mic2 size={48} className='text-muted-text' strokeWidth={1.5} />
                                     </div>
                                 )}
                                 <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
-                                    <span className='text-6xl'>▶️</span>
+                                    <div className='w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center'>
+                                        <PlayIcon size={32} className='text-white ml-1' />
+                                    </div>
                                 </div>
                             </div>
                             <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
@@ -285,7 +290,7 @@ function GenresView() {
         <div>
             <h3 className='text-2xl font-semibold text-cream-text mb-4'>Genres</h3>
             <div className='text-center py-12'>
-                <p className='text-4xl mb-4'>🎸</p>
+                <Radio size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
                 <p className='text-xl text-muted-text mb-2'>Genre view coming soon!</p>
                 <p className='text-sm text-muted-text'>We'll organize your music by genre here</p>
             </div>
@@ -337,7 +342,7 @@ function PlaylistView({ playlist }) {
 
             {playlist.songs.length === 0 ? (
                 <div className='text-center py-12'>
-                    <p className='text-4xl mb-4'>📝</p>
+                    <ListMusic size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
                     <p className='text-xl text-muted-text mb-2'>Empty playlist</p>
                     <p className='text-sm text-muted-text'>Add songs from your library</p>
                 </div>
@@ -354,7 +359,7 @@ function PlaylistView({ playlist }) {
                                     {song.artwork ? (
                                         <img src={song.artwork} alt={song.album} className='w-full h-full object-cover' />
                                     ) : (
-                                        <span>🎵</span>
+                                        <Music size={20} className='text-muted-text' />
                                     )}
                                 </div>
 
@@ -377,7 +382,7 @@ function PlaylistView({ playlist }) {
                                         })
                                     }}
                                     className='w-8 h-8 flex items-center justify-center text-muted-text hover:text-cream-text opacity-0 group-hover:opacity-100 transition'>
-                                    ⋮
+                                    <MoreVertical size={16} />
                                 </button>
                             </div>
                     ))}
@@ -392,16 +397,15 @@ function PlaylistView({ playlist }) {
                 >
                     <ContextMenuItem
                         onClick={handleRemoveFromPlaylist}
-                        icon='🗑️'
                     >
                         Remove from Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem icon='💿'>
+                    <ContextMenuItem>
                         Go to Album
                     </ContextMenuItem>
-                    <ContextMenuItem icon='🎤'>
-                        Go to Album
+                    <ContextMenuItem>
+                        Go to Artist
                     </ContextMenuItem>
                 </ContextMenu>
             )}
@@ -463,8 +467,8 @@ function AlbumDetailView({ albumName }) {
                             className='w-full h-full object-cover'
                         />
                     ) : (
-                        <div className='w-full h-full flex items-center justify-center text-8xl'>
-                            💿
+                        <div className='w-full h-full flex items-center justify-center'>
+                            <Disc3 size={80} className='text-muted-text' strokeWidth={1.5} />
                         </div>
                     )}
                 </div>
@@ -481,8 +485,9 @@ function AlbumDetailView({ albumName }) {
 
                     <button
                         onClick={handlePlayAlbum}
-                        className='bg-gradient-hero text-cream-text px-8 py-3 rounded-lg hover:opacity-80 transition text-lg font-semibold'>
-                            ▶ Play Album
+                        className='bg-gradient-hero text-cream-text px-8 py-3 rounded-lg hover:opacity-80 transition text-lg font-semibold flex items-center gap-2'>
+                            <Play size={20} className='fill-current' />
+                            <span>Play Album</span>
                         </button>
                 </div>
             </div>
@@ -502,7 +507,7 @@ function AlbumDetailView({ albumName }) {
                             {song.artwork ? (
                                 <img src={song.artwork} alt={song.album} className='w-full h-full object-cover' />
                             ) : (
-                                <span>...</span>
+                                <Music size={20} className='text-muted-text' />
                             )}
                         </div>
 
@@ -526,7 +531,7 @@ function AlbumDetailView({ albumName }) {
                                 });
                             }}
                             className='w-8 h-8 flex items-center justify-center text-muted-text hover:text-cream-text opacity-0 group-hover:opacity-100 transition'>
-                                ⋮
+                                <MoreVertical size={16} />
                             </button>
                     </div>
                 ))}
@@ -540,15 +545,13 @@ function AlbumDetailView({ albumName }) {
                 >
                     <ContextMenuItem
                         onClick={() => {
-                            const { addToPlaylist, playlists, createPlaylist } = useMusic();
                             setContextMenu(null);
                         }}
-                        icon='➕'
                     >
                         Add to Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem icon='🎤'>
+                    <ContextMenuItem>
                         Go to Artist
                     </ContextMenuItem>
                 </ContextMenu>
@@ -610,8 +613,8 @@ function ArtistDetailView({ artistName }) {
                             className='w-full h-full object-cover'
                         />
                     ) : (
-                        <div className='w-full h-full flex items-center justify-center text-8xl'>
-                            🎤
+                        <div className='w-full h-full flex items-center justify-center'>
+                            <Mic2 size={80} className='text-muted-text' strokeWidth={1.5} />
                         </div>
                     )}
                 </div>
@@ -627,8 +630,9 @@ function ArtistDetailView({ artistName }) {
 
                     <button
                         onClick={handlePlayArtist}
-                        className='bg-gradient-hero text-cream-text px-8 py-3 rounded-lg hover:opacity-80 text-lg font-semibold'>
-                        ▶ Play All
+                        className='bg-gradient-hero text-cream-text px-8 py-3 rounded-lg hover:opacity-80 transition text-lg font-semibold flex items-center gap-2'>
+                        <Play size={20} className='fill-current' />
+                        <span>Play All</span>
                     </button>
                 </div>
             </div>
@@ -648,7 +652,7 @@ function ArtistDetailView({ artistName }) {
                             {song.artwork ? (
                                 <img src={song.artwork} alt={song.album} className='w-full h-full object-cover' />
                             ) : (
-                                <span>🎵</span>
+                                <Music size={20} className='text-muted-text' />
                             )}
                         </div>
 
@@ -672,7 +676,7 @@ function ArtistDetailView({ artistName }) {
                                 });
                             }}
                             className='w-8 h-8 flex items-center justify-center text-muted-text hover:text-cream-text opacity-0 group-hover:opacity-100 transition'>
-                            ⋮
+                            <MoreVertical size={16} />
                         </button>
                     </div>
                 ))}
@@ -688,12 +692,11 @@ function ArtistDetailView({ artistName }) {
                         onClick={() => {
                             setContextMenu(null);
                         }}
-                        icon='➕'
                     >
                         Add to Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem icon='💿'>
+                    <ContextMenuItem>
                         Go to Album
                     </ContextMenuItem>
                 </ContextMenu>

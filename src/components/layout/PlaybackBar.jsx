@@ -1,4 +1,5 @@
 import { usePlayer } from '../../context/PlayerContext';
+import { Shuffle, SkipBack, Play, Pause, SkipForward, Repeat, Repeat1, Volume2, Volume1, VolumeX } from 'lucide-react';
 
 function PlaybackBar() {
     const {
@@ -69,35 +70,33 @@ function PlaybackBar() {
                         onClick={toggleShuffle}
                         disabled={!currentTrack}
                         className={`text-xl transition disabled:opacity-30 disabled:cursor-not-allowed ${isShuffle ? 'text-primary-purple' : 'text-muted-text hover:text-cream-text'}`}
-                        title={isShuffle ? 'Shuffle on' : 'Shuffle off'}
-                    >
-                        🔀
+                        title={isShuffle ? 'Shuffle on' : 'Shuffle off'}>
+                        <Shuffle size={20} />
                     </button>
                     <button
                         onClick={playPrevious}
                         disabled={!currentTrack}
                         className='text-2xl text-muted-text hover:text-cream-text transition disabled:opacity-30 disabled:cursor-not-allowed'>
-                            ⏮
+                        <SkipBack size={24} />
                     </button>
                     <button
                         onClick={togglePlay}
                         disabled={!currentTrack}
                         className='w-12 h-12 bg-gradient-hero rounded-full flex items-center justify-center text-2xl hover:opacity-80 transition disabled:opacity-30 disabled:cursor-not-allowed'>
-                            {isPlaying ? '⏸' : '▶'}
+                            {isPlaying ? <Pause size={24} /> : <Play size={24} className='ml-0.5' />}
                     </button>
                     <button
                         onClick={playNext}
                         disabled= {!currentTrack}
                         className='text-2xl text-muted-text hover:text-cream-text transition disabled:opacity-30 disabled:cursor-not-allowed'>
-                            ⏭
+                        <SkipForward size={24} />
                     </button>
                     <button
                         onClick={toggleRepeat}
                         disabled={!currentTrack}
                         className={`text-xl transition disabled:opacity-30 disabled:cursor-not-allowed ${repeatMode !== 'off' ? 'text-primary-purple' : 'text-muted-text hover:text-cream-text'}`}
-                        title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'all' ? 'Repeat all' : 'Repeat one'}
-                    >
-                        {repeatMode === 'one' ? '🔂' : '🔁'}
+                        title={repeatMode === 'off' ? 'Repeat off' : repeatMode === 'all' ? 'Repeat all' : 'Repeat one'}>
+                        {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
                     </button>
                 </div>
                 <div className='w-full flex items-center gap-2'>
@@ -119,9 +118,15 @@ function PlaybackBar() {
                 </div>
             </div>
             <div className='flex items-center gap-4 w-80 justify-end'>
-                <span className='text-xl'>
-                    {volume === 0 ? '🔇' : volume < 50 ? '🔉' : '🔊'}
-                </span>
+                <div className='text-muted-text'>
+                    {volume === 0 ? (
+                        <VolumeX size={20} />
+                    ) : volume < 50 ? (
+                        <Volume1 size={20} />
+                    ) : (
+                        <Volume2 size={20} />
+                    )}
+                </div>
                 <input
                     type='range'
                     min='0'
