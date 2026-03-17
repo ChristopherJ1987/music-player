@@ -6,7 +6,7 @@ const MusicContext = createContext();
 export function MusicProvider({ children }) {
     const [library, setLibrary] = useState([]);
     const [playlists, setPlaylists] = useState([]);
-    const [currentView, setCurrentView] = useState('library');
+    const [currentView, setCurrentView] = useState('albums');
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredSongs = library.filter(song =>
@@ -30,6 +30,21 @@ export function MusicProvider({ children }) {
     }, {});
 
     const albums = Object.values(albumsMap);
+
+    const artistsMap = library.reduce((acc, song) => {
+        const artistKey = song.artist || 'Unknown Artist';
+        if (!acc[artistKey]) {
+            acc[artistKey] = {
+                name: artistKey,
+                artwork: song.artwork || null,
+                songs: []
+            };
+        }
+        acc[artistKey].songs.push(song);
+        return acc;
+    }, {});
+
+    const artists = Object.values(artistsMap);
 
     const addSongsToLibrary = (songs) => {
         setLibrary(prevLibrary => [...prevLibrary, ...songs])
@@ -65,6 +80,7 @@ export function MusicProvider({ children }) {
         searchQuery,
         filteredSongs,
         albums,
+        artists,
         setLibrary,
         setCurrentView,
         setSearchQuery,

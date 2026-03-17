@@ -25,21 +25,21 @@ function Sidebar() {
                 <div className="space-y-2">
 
                     <button 
-                        onClick={() => setCurrentView('library')}
+                        onClick={() => setCurrentView('albums')}
                         className={`w-full px-4 py-2 rounded-lg text-left transition ${
-                            currentView === 'library'
+                            currentView === 'albums'
                                 ? 'text-primary-purple bg-primary-purple/10'
                                 : 'text-muted-text hover:text-cream-text'
                             }`}
                     >
-                        🏠 Library
+                        Albums
                     </button>
 
                     <button
-                        onClick={() => setCurrentView('albums')}
-                        className={`w-full px-4 py-2 rounded-lg text-left transition ${currentView === 'albums' ? 'text-primary-purple bg-primary-purple/10' : 'text-muted-text hover:text-cream-text'}`}
+                        onClick={() => setCurrentView('artists')}
+                        className={`w-full px-4 py-2 rounded-lg text-left transition ${currentView === 'artists' ? 'text-primary-purple bg-primary-purple/10' : 'text-muted-text hover:text-cream-text'}`}
                     >
-                        💿 Albums
+                        Artists
                     </button>
 
                     <button
@@ -50,7 +50,7 @@ function Sidebar() {
                             : 'text-muted-text hover:text-cream-text'
                         }`}
                     >
-                        🎵 Genres
+                        Genres
                     </button>
 
                 </div>
