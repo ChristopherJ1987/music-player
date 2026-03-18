@@ -107,7 +107,9 @@ function AlbumsView() {
             setScanProgress({ current:0, total: files.length })
 
             // Scan files for metadata
-            const scannedSongs = await scanAudioFiles(files)
+            const scannedSongs = await scanAudioFiles(files, (current, total) => {
+                setScanProgress({ current, total });
+            });
 
             // Add to library
             addSongsToLibrary(scannedSongs)
@@ -156,6 +158,23 @@ function AlbumsView() {
             </div>
 
             {isScanning && (
+                <div className='bg-surface-dark p-4 rounded-lg mb-4 border border-primary-purple'>
+                    <div className='flex items-center justify-between mb-2'>
+                        <p className='text-cream-text'>
+                            Scanning files...
+                        </p>
+                        <p className='text-primary-purple front semi-bold'>
+                            {scanProgress.current} / {scanProgress.total}
+                            ({Math.round((scanProgress.current / scanProgress.total) * 100)}%)
+                        </p>
+                    </div>
+                    <div className='h-3 bg-graphite rounded-full overflow-hidden'>
+                        <div className='h-full bg-gradient-hero transition-all duration-300 ease-out' style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }} />
+                    </div>
+                </div>
+            )}
+
+            {/* {isScanning && (
                 <div className='bg-surface-dark p-4 rounded-lg mb-4'>
                     <p className='text-cream-text mb-2'>
                         Scanning files... {scanProgress.current} / {scanProgress.total}
@@ -164,7 +183,7 @@ function AlbumsView() {
                         <div className='h-full bg-gradient-hero transition-all' style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }} />
                     </div>
                 </div>
-            )}
+            )} */}
 
             {albums.length === 0 ? (
                 <div className='text-center py-12'>

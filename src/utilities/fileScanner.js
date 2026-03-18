@@ -9,9 +9,12 @@ window.Buffer = Buffer;
  * @returns {Promise<Array>} - Array of song objects with metadata
  */
 
-export async function scanAudioFiles(files) {
+export async function scanAudioFiles(files, onProgress) {
     const songs = [];
     const supportedFormats = ['.mp3', '.flac', '.wav', '.m4a', '.ogg', '.aac'];
+
+    let processed = 0;
+    const total = files.length;
 
     for (const file of files) {
         try {
@@ -22,6 +25,10 @@ export async function scanAudioFiles(files) {
 
             if (!isAudioFile) {
                 console.log(`Skipping non-audio file: ${file.name}`)
+                processed++;
+                if (onProgress) {
+                    onProgress(processed, total);
+                }
                 continue
             }
 
@@ -57,6 +64,12 @@ export async function scanAudioFiles(files) {
         } catch (error) {
             console.error(`❌ Error Scanning ${file.name}:`, error)
             // Continue with next file even if one fails
+        }
+
+        // Update progress after each file
+        processed++;
+        if (onProgress) {
+            onProgress(processed, total);
         }
     }
 
