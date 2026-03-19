@@ -73,6 +73,14 @@ export function MusicProvider({ children }) {
         ))
     }
 
+    const addAlbumToPlaylist = (playlistId, album) => {
+        setPlaylists(prev => prev.map(playlist => playlist.id === playlistId ? { ...playlist, songs: [...playlist.songs, ...album.songs] } : playlist));
+    };
+
+    const addArtistToPlaylist = (playlistId, artist) => {
+        setPlaylists(prev => prev.map(playlist => playlist.id === playlistId ? { ...playlist, songs: [...playlist.songs, ...artist.songs] } : playlist));
+    };
+
     const value = {
         library,
         playlists,
@@ -88,6 +96,8 @@ export function MusicProvider({ children }) {
         createPlaylist,
         addToPlaylist,
         removeFromPlaylist,
+        addAlbumToPlaylist,
+        addArtistToPlaylist,
     }
 
     return (

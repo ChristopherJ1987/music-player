@@ -76,10 +76,13 @@ function MainContent() {
 }
     
 function AlbumsView() {
-    const { albums, setCurrentView, addSongsToLibrary } = useMusic();
+    const { albums, setCurrentView, addSongsToLibrary, playlists, addAlbumToPlaylist } = useMusic();
+    const { play } = usePlayer();
     const [sortBy, setSortBy] = useState('name');
     const [isScanning, setIsScanning] = useState(false);
     const [scanProgress, setScanProgress] = useState({ current: 0, total: 0 });
+    const [albumContextMenu, setAlbumContextMenu] = useState(null);
+    const [toast, setToast] = useState(null);
     const sortedAlbums = [...albums].sort((a, b) => {
         if (sortBy === 'name') {
             return a.name.localeCompare(b.name);
@@ -91,6 +94,18 @@ function AlbumsView() {
     const handleAlbumClick = (albumName) => {
         setCurrentView(`album-${encodeURIComponent(albumName)}`);
     };
+
+    const handlePlayAlbum = (album) => {
+        if (album.songs.length > 0) {
+            play(album.songs[0], album.songs);
+        }
+    };
+
+    const handleAddAlbumToPlaylist = (playlistId) => {
+        addAlbumToPlaylist(playlistId, albumContextMenu.album);
+        setToast(`Added '${albumContextMenu.album.name}' to playlist`);
+        setAlbumContextMenu(null);
+    }
 
     const handleAddMusic = async () => {
         try {
@@ -163,7 +178,7 @@ function AlbumsView() {
                         <p className='text-cream-text'>
                             Scanning files...
                         </p>
-                        <p className='text-primary-purple front semi-bold'>
+                        <p className='text-primary-purple font-semibold'>
                             {scanProgress.current} / {scanProgress.total}
                             ({Math.round((scanProgress.current / scanProgress.total) * 100)}%)
                         </p>
@@ -173,18 +188,6 @@ function AlbumsView() {
                     </div>
                 </div>
             )}
-
-            {/* {isScanning && (
-                <div className='bg-surface-dark p-4 rounded-lg mb-4'>
-                    <p className='text-cream-text mb-2'>
-                        Scanning files... {scanProgress.current} / {scanProgress.total}
-                    </p>
-                    <div className='h-2 bg-graphite rounded-full overflow-hidden'>
-                        <div className='h-full bg-gradient-hero transition-all' style={{ width: `${(scanProgress.current / scanProgress.total) * 100}%` }} />
-                    </div>
-                </div>
-            )} */}
-
             {albums.length === 0 ? (
                 <div className='text-center py-12'>
                     <Disc3 size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
@@ -215,10 +218,33 @@ function AlbumsView() {
                                         <Disc3 size={48} className='text-muted-text' strokeWidth={1.5} />
                                     </div>
                                 )}
-                                <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
-                                    <div className='w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center'>
-                                        <PlayIcon size={32} className='text-white ml-1' />
-                                    </div>
+                                <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                    {/* Three-dot menu button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            setAlbumContextMenu({
+                                                x: rect.left,
+                                                y: rect.bottom +5,
+                                                album: album
+                                            });
+                                        }}
+                                        className='absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/80 transition z-10'
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+                                    
+                                    {/* Play button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePlayAlbum(album);
+                                        }}
+                                        className='absolute bottom-2 right-2 w-12 h-12 bg-primary-purple/90 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-primary-purple transition hover:scale-110 z-10'
+                                    >
+                                        <Play size={20} className='ml-0.5' />
+                                    </button>
                                 </div>
                             </div>
                             <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
@@ -234,12 +260,73 @@ function AlbumsView() {
                     ))}
                 </div>
             )}
+
+            {/* Album context menu */}
+            {albumContextMenu && (
+                <ContextMenu
+                    x={albumContextMenu.x}
+                    y={albumContextMenu.y}
+                    onClose={() => setAlbumContextMenu(null)}
+                >
+                    {/* Add album to playlist submenu */}
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add Album to Playlist
+                            </div>
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddAlbumToPlaylist(playlist.id)}>
+                                        {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <div className='px-4 py-2 text-sm text-muted-text'>
+                                No playlists yet
+                            </div>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`album-${encodeURIComponent(albumContextMenu.album.name)}`);
+                            setAlbumContextMenu(null);
+                        }}
+                    >
+                        View Album
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(albumContextMenu.album.artist)}`);
+                            setAlbumContextMenu(null);
+                        }}
+                    >
+                        View Artist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {/* Toast notifications */}
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 }
 
 function ArtistsView() {
-    const { artists, setCurrentView } = useMusic();
+    const { artists, setCurrentView, playlists, addArtistToPlaylist } = useMusic();
+    const { play } = usePlayer();
+    const [artistContextMenu, setArtistContextMenu] = useState(null);
+    const [toast,setToast] = useState(null);
 
     const sortedArtists = [...artists].sort((a, b) => {
         return a.name.localeCompare(b.name);
@@ -248,6 +335,18 @@ function ArtistsView() {
     const handleArtistClick = (artistName) => {
         setCurrentView(`artist-${encodeURIComponent(artistName)}`);
     };
+
+    const handlePlayArtist = (artist) => {
+        if (artist.songs.length > 0) {
+            play(artist.songs[0], artist.songs);
+        }
+    };
+
+    const handleAddArtistToPlaylist = (playlistId) => {
+        addArtistToPlaylist(playlistId, artistContextMenu.artist);
+        setToast(`Added all songs by '${artistContextMenu.artist.name}' to playlist`);
+        setArtistContextMenu(null);
+    }
 
     return (
         <div>
@@ -284,10 +383,33 @@ function ArtistsView() {
                                         <Mic2 size={48} className='text-muted-text' strokeWidth={1.5} />
                                     </div>
                                 )}
-                                <div className='absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center'>
-                                    <div className='w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center'>
-                                        <PlayIcon size={32} className='text-white ml-1' />
-                                    </div>
+                                <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                    {/* Three-dot menu button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            setArtistContextMenu({
+                                                x: rect.left,
+                                                y: rect.bottom + 5,
+                                                artist: artist
+                                            });
+                                        }}
+                                        className='absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/80 transition z-10'
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+
+                                    {/* Play button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePlayArtist(artist);
+                                        }}
+                                        className='absolute bottom-2 right-2 w-12 h-12 bg-primary-purple/90 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-primary-purple transition hover:scale-110 z-10'
+                                    >
+                                        <Play size={20} className='ml-0.5' />
+                                    </button>
                                 </div>
                             </div>
                             <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
@@ -299,6 +421,57 @@ function ArtistsView() {
                         </div>
                     ))}
                 </div>
+            )}
+
+            {/* Artist context menu */}
+            {artistContextMenu && (
+                <ContextMenu
+                    x={artistContextMenu.x}
+                    y={artistContextMenu.y}
+                    onClose={() => setArtistContextMenu(null)}
+                >
+                    {/* Add all songs to playlist submenu */}
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add All Songs to Playlist
+                            </div>
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddArtistToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <div className='px-4 py-2 text-sm text-muted-text'>
+                                No playlists yet
+                            </div>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(artistContextMenu.artist.name)}`);
+                            setArtistContextMenu(null);
+                        }}
+                    >
+                        View Artist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {/* Toast notifications */}
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={() => setToast(null)}
+                />
             )}
         </div>
     );
