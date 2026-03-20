@@ -206,6 +206,14 @@ function AlbumsView() {
                         <div
                             key={index}
                             onClick={() => handleAlbumClick(album.name)}
+                            onContextMenu={(e) => {
+                                e.preventDefault();
+                                setAlbumContextMenu({
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                    album: album
+                                });
+                            }}
                             className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'>
                             <div className='aspect-square rounded-lg mb-3 overflow-hidden bg-gradient-accent relative'>
                                 {album.artwork ? (
@@ -371,6 +379,14 @@ function ArtistsView() {
                         <div
                             key={index}
                             onClick={() => handleArtistClick(artist.name)}
+                            onContextMenu={(e) => {
+                                e.preventDefault();
+                                setArtistContextMenu({
+                                    x: e.clientX,
+                                    y: e.clientY,
+                                    artist: artist
+                                });
+                            }}
                             className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'>
                             <div className='aspect-square rounded-lg mb-3 overflow-hidden bg-gradient-accent relative'>
                                 {artist.artwork ? (
