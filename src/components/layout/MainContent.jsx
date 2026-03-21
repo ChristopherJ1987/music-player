@@ -507,7 +507,7 @@ function GenresView() {
 }
 
 function PlaylistView({ playlist }) {
-    const { removeFromPlaylist } = useMusic();
+    const { removeFromPlaylist, setCurrentView } = useMusic();
     const { play } = usePlayer();
     const [contextMenu, setContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
@@ -609,10 +609,20 @@ function PlaylistView({ playlist }) {
                         Remove from Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`album-${encodeURIComponent(contextMenu.song.album)}`);
+                            setContextMenu(null);
+                        }}
+                    >
                         Go to Album
                     </ContextMenuItem>
-                    <ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(ContextMenu.song.artist)}`);
+                            setContextMenu(null);
+                        }}
+                    >
                         Go to Artist
                     </ContextMenuItem>
                 </ContextMenu>
@@ -630,7 +640,7 @@ function PlaylistView({ playlist }) {
 }
 
 function AlbumDetailView({ albumName }) {
-    const { albums } = useMusic();
+    const { albums, setCurrentView } = useMusic();
     const { play } = usePlayer();
     const [contextMenu, setContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
@@ -759,8 +769,13 @@ function AlbumDetailView({ albumName }) {
                         Add to Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem>
-                        Go to Artist
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(contextMenu.song.artist)}`);
+                            setContextMenu(null);
+                        }}
+                    >
+                            Go to Artist
                     </ContextMenuItem>
                 </ContextMenu>
             )}
@@ -776,7 +791,7 @@ function AlbumDetailView({ albumName }) {
 }
 
 function ArtistDetailView({ artistName }) {
-    const { artists } = useMusic();
+    const { artists, setCurrentView } = useMusic();
     const { play } = usePlayer();
     const [contextMenu, setContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
@@ -904,7 +919,12 @@ function ArtistDetailView({ artistName }) {
                         Add to Playlist
                     </ContextMenuItem>
                     <ContextMenuDivider />
-                    <ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`album-${encodeURIComponent(contextMenu.song.album)}`);
+                            setContextMenu(null);
+                        }}
+                    >
                         Go to Album
                     </ContextMenuItem>
                 </ContextMenu>
