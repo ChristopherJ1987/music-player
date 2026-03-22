@@ -76,7 +76,7 @@ function MainContent() {
 }
     
 function AlbumsView() {
-    const { albums, setCurrentView, addSongsToLibrary, playlists, addAlbumToPlaylist } = useMusic();
+    const { albums, setCurrentView, addSongsToLibrary, playlists, addAlbumToPlaylist, createPlaylist } = useMusic();
     const { play } = usePlayer();
     const [sortBy, setSortBy] = useState('name');
     const [isScanning, setIsScanning] = useState(false);
@@ -282,6 +282,24 @@ function AlbumsView() {
                             <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
                                 Add Album to Playlist
                             </div>
+
+                            {/* Create new Playlist option */}
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addAlbumToPlaylist(newPlaylist.id, albumContextMenu.album);
+                                        setToast(`Created '${playlistName}' and added '${albumContextMenu.album.name}'`);
+                                        setAlbumContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+
+                            <ContextMenuDivider />
+
                             {playlists.map(playlist => (
                                 <ContextMenuItem
                                     key={playlist.id}
@@ -293,9 +311,19 @@ function AlbumsView() {
                         </>
                     ) : (
                         <>
-                            <div className='px-4 py-2 text-sm text-muted-text'>
-                                No playlists yet
-                            </div>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addAlbumToPlaylist(newPlaylist.id, albumContextMenu.album);
+                                        setToast(`Created '${playlistName}' and added '${albumContextMenu.album.name}'`);
+                                        setAlbumContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
                             <ContextMenuDivider />
                         </>
                     )}
@@ -331,7 +359,7 @@ function AlbumsView() {
 }
 
 function ArtistsView() {
-    const { artists, setCurrentView, playlists, addArtistToPlaylist } = useMusic();
+    const { artists, setCurrentView, playlists, addArtistToPlaylist, createPlaylist } = useMusic();
     const { play } = usePlayer();
     const [artistContextMenu, setArtistContextMenu] = useState(null);
     const [toast,setToast] = useState(null);
@@ -450,8 +478,26 @@ function ArtistsView() {
                     {playlists.length > 0 ? (
                         <>
                             <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
-                                Add All Songs to Playlist
+                                Add Artists Songs to Playlist
                             </div>
+
+                            {/* Create new playlist option */}
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addArtistToPlaylist(newPlaylist.id, artistContextMenu.artist);
+                                        setToast(`Created '${playlistName}' and added all songs by '${artistContextMenu.artist.name}'`);
+                                        setArtistContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+
+                            <ContextMenuDivider />
+
                             {playlists.map(playlist => (
                                 <ContextMenuItem
                                     key={playlist.id}
@@ -464,9 +510,19 @@ function ArtistsView() {
                         </>
                     ) : (
                         <>
-                            <div className='px-4 py-2 text-sm text-muted-text'>
-                                No playlists yet
-                            </div>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addArtistToPlaylist(newPlaylist.id, artistContextMenu.artist);
+                                        setToast(`Created '${playlistName}' and added all songs by '${artistContextMenu.artist.name}'`);
+                                        setArtistContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
                             <ContextMenuDivider />
                         </>
                     )}
@@ -619,7 +675,7 @@ function PlaylistView({ playlist }) {
                     </ContextMenuItem>
                     <ContextMenuItem
                         onClick={() => {
-                            setCurrentView(`artist-${encodeURIComponent(ContextMenu.song.artist)}`);
+                            setCurrentView(`artist-${encodeURIComponent(contextMenu.song.artist)}`);
                             setContextMenu(null);
                         }}
                     >
@@ -640,7 +696,7 @@ function PlaylistView({ playlist }) {
 }
 
 function AlbumDetailView({ albumName }) {
-    const { albums, setCurrentView } = useMusic();
+    const { albums, setCurrentView, playlists, addToPlaylist, createPlaylist } = useMusic();
     const { play } = usePlayer();
     const [contextMenu, setContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
@@ -673,6 +729,12 @@ function AlbumDetailView({ albumName }) {
             song: song
         });
     };
+
+    const handleAddToPlaylist = (playlistId) => {
+        addToPlaylist(playlistId, contextMenu.song);
+        setToast(`Added '${contextMenu.song.title}' to playlist`);
+        setContextMenu(null);
+    }
 
     return (
         <div>
@@ -761,14 +823,61 @@ function AlbumDetailView({ albumName }) {
                     y={contextMenu.y}
                     onClose={() => setContextMenu(null)}
                 >
-                    <ContextMenuItem
-                        onClick={() => {
-                            setContextMenu(null);
-                        }}
-                    >
-                        Add to Playlist
-                    </ContextMenuItem>
-                    <ContextMenuDivider />
+                    {/* Add to playlist submenu */}
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add to Playlist
+                            </div>
+
+                            {/* Creat new playlist option */}
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, contextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${contextMenu.song.title}'`);
+                                        setContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+
+                            <ContextMenuDivider />
+
+                            {/* Existing playlists */}
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            {/* No playlists yet - show create option */}
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, contextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${contextMenu.song.title}'`);
+                                        setContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+
                     <ContextMenuItem
                         onClick={() => {
                             setCurrentView(`artist-${encodeURIComponent(contextMenu.song.artist)}`);
@@ -791,7 +900,7 @@ function AlbumDetailView({ albumName }) {
 }
 
 function ArtistDetailView({ artistName }) {
-    const { artists, setCurrentView } = useMusic();
+    const { artists, setCurrentView, playlists, addToPlaylist, createPlaylist } = useMusic();
     const { play } = usePlayer();
     const [contextMenu, setContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
@@ -823,6 +932,12 @@ function ArtistDetailView({ artistName }) {
             y: e.clientY,
             song: song
         });
+    };
+
+    const handleAddToPlaylist = (playlistId) => {
+        addToPlaylist(playlistId, contextMenu.song);
+        setToast(`Added '${contextMenu.song.title}' to playlist`);
+        setContextMenu(null);
     };
 
     return (
@@ -911,14 +1026,59 @@ function ArtistDetailView({ artistName }) {
                     y={contextMenu.y}
                     onClose={() => setContextMenu(null)}
                 >
-                    <ContextMenuItem
-                        onClick={() => {
-                            setContextMenu(null);
-                        }}
-                    >
-                        Add to Playlist
-                    </ContextMenuItem>
-                    <ContextMenuDivider />
+                    {/* Add to playlist submenu */}
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add to Playlist
+                            </div>
+
+                            {/* Create new playlist option */}
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, contextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${contextMenu.song.title}'`);
+                                        setContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+
+                            <ContextMenuDivider />
+
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                        <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, contextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${contextMenu.song.title}'`);
+                                        setContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist...
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+
                     <ContextMenuItem
                         onClick={() => {
                             setCurrentView(`album-${encodeURIComponent(contextMenu.song.album)}`);
