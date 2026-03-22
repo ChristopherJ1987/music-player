@@ -295,7 +295,7 @@ function AlbumsView() {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
 
                             <ContextMenuDivider />
@@ -322,7 +322,7 @@ function AlbumsView() {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
                             <ContextMenuDivider />
                         </>
@@ -493,7 +493,7 @@ function ArtistsView() {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
 
                             <ContextMenuDivider />
@@ -521,7 +521,7 @@ function ArtistsView() {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
                             <ContextMenuDivider />
                         </>
@@ -842,7 +842,7 @@ function AlbumDetailView({ albumName }) {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
 
                             <ContextMenuDivider />
@@ -872,7 +872,7 @@ function AlbumDetailView({ albumName }) {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
                             <ContextMenuDivider />
                         </>
@@ -1045,7 +1045,7 @@ function ArtistDetailView({ artistName }) {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
 
                             <ContextMenuDivider />
@@ -1073,7 +1073,7 @@ function ArtistDetailView({ artistName }) {
                                     }
                                 }}
                             >
-                                + Create New Playlist...
+                                + Create New Playlist
                             </ContextMenuItem>
                             <ContextMenuDivider />
                         </>

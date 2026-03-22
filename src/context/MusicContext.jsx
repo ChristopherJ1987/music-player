@@ -60,6 +60,10 @@ export function MusicProvider({ children }) {
         return newPlaylist;
     };
 
+    const removePlaylist = (playlistId) => {
+        setPlaylists(prev => prev.filter(playlist => playlist.id !== playlistId));
+    };
+
     const addToPlaylist = (playlistId, song) => {
         setPlaylists(prev => prev.map(playlist =>
             playlist.id === playlistId ? { ...playlist, songs: [...playlist.songs, song] } : playlist
@@ -94,6 +98,7 @@ export function MusicProvider({ children }) {
         setSearchQuery,
         addSongsToLibrary,
         createPlaylist,
+        removePlaylist,
         addToPlaylist,
         removeFromPlaylist,
         addAlbumToPlaylist,

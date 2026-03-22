@@ -1,15 +1,30 @@
 import { useMusic } from '../../context/MusicContext';
+import { useState } from 'react';
+import ContextMenu, { ContextMenuItem, ContextMenuDivider } from '../ui/ContextMenu';
+import Toast from '../ui/Toast';
 import { Plus } from 'lucide-react';
 
 function Sidebar() {
-    const { currentView, setCurrentView, playlists, createPlaylist } = useMusic();
+    const { currentView, setCurrentView, playlists, createPlaylist, removePlaylist } = useMusic();
+    const [playlistContextMenu, setPlaylistContextMenu] = useState(null);
+    const [toast, setToast] = useState(null);
 
     const handleCreatePlaylist = () => {
         const name = prompt('Enter playlist name:');
         if (name) {
             createPlaylist(name);
         }
-    }
+    };
+
+    const handleRemovePlaylist = () => {
+        removePlaylist(playlistContextMenu.playlist.id);
+        setToast(`Deleted playlist '${playlistContextMenu.playlist.name}'`);
+        setPlaylistContextMenu(null);
+
+        if (currentView === `playlist-${playlistContextMenu.playlist.id}`) {
+            setCurrentView('albums');
+        }
+    };
 
     return (
         <div className="w-60 bg-surface-dark border-r border-graphite flex flex-col">
@@ -57,39 +72,70 @@ function Sidebar() {
                 </div>
 
                 {/* Playlists Section */}
-                <div className="mt-8">
-                    <h3 className="px-4 text-xs font-semibold text-muted-text uppercase tracking-wider mb-2">
-                        Playlists
-                    </h3>
-                    <div className="space-y-1">
-                        {playlists.map((playlist) => (
-                            <button
+                <div className="pt-6">
+                    <div className='px-4 mb-2'>
+                        <h1 className="px-4 text-sm font-semibold text-muted-text uppercase tracking-wider mb-2">
+                            Playlists
+                        </h1>
+                    </div>
+
+                    <div className='space-y-1'>
+                        {playlists.map(playlist => (
+                            <div
                                 key={playlist.id}
                                 onClick={() => setCurrentView(`playlist-${playlist.id}`)}
-                                className={`w-full px-4 py-2 rounded-lg text-left transition ${
-                                    currentView === `playlist-${playlist.id}`
-                                        ? 'text-primary-purple bg-primary-purple/10'
-                                        : 'text-muted-text hover:text-cream-text'
-                                }`}
+                                onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    setPlaylistContextMenu({
+                                        x: e.clientX,
+                                        y: e.clientY,
+                                        playlist: playlist
+                                    });
+                                }}
+                                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition cursor-pointer ${currentView === `playlist-${playlist.id}` ? 'bg-primary-purple text-cream-text' : 'text-muted-text hover:text-cream-text hover:bg-graphite'}`}
                             >
-                                { playlist.name }
-                            </button>
+                                <span className='truncate'>
+                                    {playlist.name}
+                                </span>
+                            </div>
                         ))}
-
                         <button
                             onClick={handleCreatePlaylist}
                             className='w-full px-4 py-2 text-left text-muted-text hover:text-primary-purple transition flex items-center gap-3'
                         >
-                            <Plus size={20} />
-                            <span>New Playlist</span>
-                        </button>                        
+                            <Plus size={16} />
+                            <span>Create New Playlist</span>
+                        </button>
                     </div>
                 </div>
 
             </nav>
 
+            {/* Playlist context menu */}
+            {playlistContextMenu && (
+                <ContextMenu
+                    x={playlistContextMenu.x}
+                    y={playlistContextMenu.y}
+                    onClose={() => setPlaylistContextMenu(null)}
+                >
+                    <ContextMenuItem
+                        onClick={handleRemovePlaylist}
+                    >
+                        Remove Playlist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {/* Toast notifications */}
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={() => setToast(null)}
+                />
+            )}
+
         </div>
-    )
+    );
 }
 
 export default Sidebar;
