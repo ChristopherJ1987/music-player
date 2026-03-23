@@ -5,7 +5,7 @@ import Toast from '../ui/Toast';
 import { Plus } from 'lucide-react';
 
 function Sidebar() {
-    const { currentView, setCurrentView, playlists, createPlaylist, removePlaylist } = useMusic();
+    const { currentView, setCurrentView, playlists, createPlaylist, removePlaylist, renamePlaylist } = useMusic();
     const [playlistContextMenu, setPlaylistContextMenu] = useState(null);
     const [toast, setToast] = useState(null);
 
@@ -24,6 +24,16 @@ function Sidebar() {
         if (currentView === `playlist-${playlistContextMenu.playlist.id}`) {
             setCurrentView('albums');
         }
+    };
+
+    const handleRenamePlaylist = () => {
+        const newName = prompt('Enter new playlist name:', playlistContextMenu.playlist.name);
+        if (newName && newName.trim() && newName.trim() !== playlistContextMenu.playlist.name) {
+            renamePlaylist(playlistContextMenu.playlist.id, newName.trim());
+            setToast(`Renamed playlist to '${newName.trim()}'`);
+        }
+
+        setPlaylistContextMenu(null);
     };
 
     return (
@@ -118,6 +128,11 @@ function Sidebar() {
                     y={playlistContextMenu.y}
                     onClose={() => setPlaylistContextMenu(null)}
                 >
+                    <ContextMenuItem
+                        onClick={handleRenamePlaylist}
+                    >
+                        Rename Playlist
+                    </ContextMenuItem>
                     <ContextMenuItem
                         onClick={handleRemovePlaylist}
                     >

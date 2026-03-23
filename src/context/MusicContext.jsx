@@ -64,6 +64,10 @@ export function MusicProvider({ children }) {
         setPlaylists(prev => prev.filter(playlist => playlist.id !== playlistId));
     };
 
+    const renamePlaylist = (playlistId, newName) => {
+        setPlaylists(prev => prev.map(playlist => playlist.id === playlistId ? { ...playlist, name: newName } : playlist));
+    };
+
     const addToPlaylist = (playlistId, song) => {
         setPlaylists(prev => prev.map(playlist =>
             playlist.id === playlistId ? { ...playlist, songs: [...playlist.songs, song] } : playlist
@@ -99,6 +103,7 @@ export function MusicProvider({ children }) {
         addSongsToLibrary,
         createPlaylist,
         removePlaylist,
+        renamePlaylist,
         addToPlaylist,
         removeFromPlaylist,
         addAlbumToPlaylist,
