@@ -2,7 +2,7 @@ import { useMusic } from '../../context/MusicContext';
 import { Search, Settings } from 'lucide-react';
 
 function TopBar() {
-    const { searchQuery, setSearchQuery } = useMusic();
+    const { searchQuery, setSearchQuery, setCurrentView } = useMusic();
 
     return (
         <div className="h-16 bg-surface-dark border-b border-graphite flex items-center justify-between px-6">
@@ -15,7 +15,7 @@ function TopBar() {
                     }
                 }}
                 >
-                    <div className='relative'>
+                    <div className='relative w-fit'>
                         <Search size={20} className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-text' strokeWidth={.5} />
                         <input
                             type='text'

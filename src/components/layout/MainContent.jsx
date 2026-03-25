@@ -12,7 +12,9 @@ function MainContent() {
     const { currentTrack, isPlaying } = usePlayer();
 
     const renderView = () => {
-        if (currentView === 'albums') {
+        if (currentView === 'search') {
+            return <SearchResultsView />
+        } else if (currentView === 'albums') {
             return <AlbumsView />
         } else if (currentView === 'artists') {
             return <ArtistsView />
@@ -1101,7 +1103,7 @@ function ArtistDetailView({ artistName }) {
 }
 
 function SearchResultsView() {
-    const { library, albums, artists, searchQuery, setCurrentView, playlists, addToPlaylist, addAlbumToPlaylist, addArtistToPlaylist } = useMusic();
+    const { library, albums, artists, searchQuery, setCurrentView, playlists, addToPlaylist, addAlbumToPlaylist, addArtistToPlaylist, createPlaylist } = useMusic();
     const { play } = usePlayer();
     const [songContextMenu, setSongContextMenu] = useState(null);
     const [albumContextMenu, setAlbumContextMenu] = useState(null);
@@ -1132,7 +1134,7 @@ function SearchResultsView() {
 
     const handlePlayAlbum = (album) => {
         if (album.songs.length > 0) {
-            play(artist.songs[0], album.songs);
+            play(album.songs[0], album.songs);
         }
     };
 
@@ -1234,7 +1236,7 @@ function SearchResultsView() {
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 const rect = e.currentTarget.getBoundingClientRect();
-                                                setContextMenu({
+                                                setSongContextMenu({
                                                     x: rect.left - 210,
                                                     y: rect.top,
                                                     song: song
@@ -1258,7 +1260,7 @@ function SearchResultsView() {
                     {/* Albums Section */}
                     {filteredAlbums.length > 0 && (
                         <div className='mb-8'>
-                            <h4 className='text-xl font-semiboldtext-cream-text mb-4'>
+                            <h4 className='text-xl font-semibold text-cream-text mb-4'>
                                 Albums
                                 <span className='text-sm text-muted-text ml-3'>
                                     {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
@@ -1289,7 +1291,7 @@ function SearchResultsView() {
                                             )}
                                             <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity'>
                                                 <button
-                                                    onClick={(e) {
+                                                    onClick={(e) => {
                                                         e.stopPropagation();
                                                         const rect = e.currentTarget.getBoundingClientRect();
                                                         setAlbumContextMenu({
@@ -1363,7 +1365,7 @@ function SearchResultsView() {
                                                         const rect = e.currentTarget.getBoundingClientRect();
                                                         setArtistContextMenu({
                                                             x: rect.left,
-                                                            y: rect.bottom + 5.
+                                                            y: rect.bottom + 5,
                                                             artist: artist
                                                         });
                                                     }}
@@ -1422,15 +1424,201 @@ function SearchResultsView() {
                                 + Create New Playlist
                             </ContextMenuItem>
                             <ContextMenuDivider />
-                            
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddSongToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, songContextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${songContextMenu.song.title}'`);
+                                        setSongContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
                         </>
                     )}
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`album-${encodeURIComponent(songContextMenu.song.album)}`);
+                            setSongContextMenu(null);
+                        }}
+                    >
+                        Go to Album
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(songContextMenu.song.artist)}`);
+                            setSongContextMenu(null);
+                        }}
+                    >
+                        Go to Artist
+                    </ContextMenuItem>
                 </ContextMenu>
             )}
 
+            {/* Album Context Menu */}
+            {albumContextMenu && (
+                <ContextMenu
+                    x={albumContextMenu.x}
+                    y={albumContextMenu.y}
+                    onClose={() => setAlbumContextMenu(null)}
+                >
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-sm text-muted-text uppercase tracking-wide'>
+                                Add Album to Playlist
+                            </div>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addAlbumToPlaylist(newPlaylist.id, albumContextMenu.album);
+                                        setToast(`Created '${playlistName}' and added '${albumContextMenu.album.name}'`);
+                                        setAlbumContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddAlbumToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addAlbumToPlaylist(newPlaylist.id, albumContextMenu.album);
+                                        setToast(`Created '${playlistName}' and added '${albumContextMenu.album.name}'`);
+                                        setAlbumContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`album-${encodeURIComponent(albumContextMenu.album.name)}`);
+                            setAlbumContextMenu(null);
+                        }}
+                    >
+                        View Album
+                    </ContextMenuItem>
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(albumContextMenu.album.artist)}`);
+                            setAlbumContextMenu(null);
+                        }}
+                    >
+                        View Artist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {/* Artist Context Menu */}
+            {artistContextMenu && (
+                <ContextMenu
+                    x={artistContextMenu.x}
+                    y={artistContextMenu.y}
+                    onClose={() => setArtistContextMenu(null)}
+                >
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add All Songs to Playlist
+                            </div>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addArtistToPlaylist(newPlaylist.id, artistContextMenu.artist);
+                                        setToast(`Created '${playlistName}' and added all songs by '${artistContextMenu.artist.name}'`);
+                                        setArtistContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                            {playlists.map(playlist => (
+                                <ContextMenuItem
+                                    key={playlist.id}
+                                    onClick={() => handleAddArtistToPlaylist(playlist.id)}
+                                >
+                                    {playlist.name}
+                                </ContextMenuItem>
+                            ))}
+                            <ContextMenuDivider />
+                        </>
+                    ) : (
+                        <>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addArtistToPlaylist(newPlaylist.id, artistContextMenu.artist);
+                                        setToast(`Created '${playlistName}' and added all songs by '${artistContextMenu.artist.name}'`);
+                                        setArtistContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                        </>
+                    )}
+                    <ContextMenuItem
+                        onClick={() => {
+                            setCurrentView(`artist-${encodeURIComponent(artistContextMenu.artist.name)}`);
+                            setArtistContextMenu(null);
+                        }}
+                    >
+                        View Artist
+                    </ContextMenuItem>
+                </ContextMenu>
+            )}
+
+            {/* Toast notifications */}
+            {toast && (
+                <Toast
+                    message={toast}
+                    onClose={() => setToast(null)}
+                />
+            )}
 
         </div>
-    )
+    );
 
 }
 
