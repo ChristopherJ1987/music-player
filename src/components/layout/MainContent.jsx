@@ -1100,4 +1100,338 @@ function ArtistDetailView({ artistName }) {
     );
 }
 
+function SearchResultsView() {
+    const { library, albums, artists, searchQuery, setCurrentView, playlists, addToPlaylist, addAlbumToPlaylist, addArtistToPlaylist } = useMusic();
+    const { play } = usePlayer();
+    const [songContextMenu, setSongContextMenu] = useState(null);
+    const [albumContextMenu, setAlbumContextMenu] = useState(null);
+    const [artistContextMenu, setArtistContextMenu] = useState(null);
+    const [toast, setToast] = useState(null);
+
+    // Filter songs
+    const filteredSongs = library.filter(song => 
+        song.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        song.artist?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        song.album?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Filter albums
+    const filteredAlbums = albums.filter(album => 
+        album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        album.artist.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Filter artists
+    const filteredArtists = artists.filter(artist =>
+        artist.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handlePlaySong = (song) => {
+        play(song, filteredSongs);
+    };
+
+    const handlePlayAlbum = (album) => {
+        if (album.songs.length > 0) {
+            play(artist.songs[0], album.songs);
+        }
+    };
+
+    const handlePlayArtist = (artist) => {
+        if (artist.songs.length > 0) {
+            play(artist.songs[0], artist.songs);
+        }
+    };
+
+    const handleAddSongToPlaylist = (playlistId) => {
+        addToPlaylist(playlistId, songContextMenu.song);
+        setToast(`Added '${songContextMenu.song.title}' to playlist`);
+        setSongContextMenu(null);
+    };
+
+    const handleAddAlbumToPlaylist = (playlistId) => {
+        addAlbumToPlaylist(playlistId, albumContextMenu.album);
+        setToast(`Added '${albumContextMenu.album.name}' to playlist`);
+        setAlbumContextMenu(null);
+    };
+
+    const handleAddArtistToPlaylist = (playlistId) => {
+        addArtistToPlaylist(playlistId, artistContextMenu.artist);
+        setToast(`Added all songs by '${artistContextMenu.artist.name}' to playlist`);
+        setArtistContextMenu(null);
+    };
+
+    const totalResults = filteredSongs.length + filteredAlbums.length + filteredArtists.length;
+
+    return (
+        <div>
+            <div className='mb-6'>
+                <h3 className='text-2xl font-semibold text-cream-text'>
+                    Search Results for '{searchQuery}'
+                </h3>
+                <p className='text-sm text-muted-text mt-1'>
+                    {totalResults} {totalResults === 1 ? 'result' : 'results'} found
+                </p>
+            </div>
+
+            {totalResults === 0 ? (
+                <div className='text-center py-12'>
+                    <Music size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
+                    <p className='text-xl text-muted-text mb-2'>
+                        No results found
+                    </p>
+                    <p className='text-sm text-muted-text'>
+                        Try a different search term
+                    </p>
+                </div>
+            ) : (
+                <>
+                    {/* Songs section */}
+                    {filteredSongs.length > 0 && (
+                        <div className='mb-8'>
+                            <h4 className='text-xl font-semibold text-cream-text mb-4'>
+                                Songs
+                                <span className='text-sm text-muted-text ml-3'>
+                                    {filteredSongs.length} {filteredSongs.length === 1 ? 'song' : 'songs'}
+                                </span>
+                            </h4>
+                            <div className='space-y-2'>
+                                {filteredSongs.slice(0, 10).map((song, i) => (
+                                    <div
+                                        key={song.id || i}
+                                        onClick={() => handlePlaySong(song)}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            setSongContextMenu({
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                song: song
+                                            });
+                                        }}
+                                        className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer flex items-center gap-4 group relative'
+                                    >
+                                        <span className='text-muted-text min-w-[30px]'>
+                                            {i + 1}
+                                        </span>
+                                        <div className='w-12 h-12 rounded overflow-hidden bg-gradient-accent flex items-center justify-center'>
+                                            {song.artwork ? (
+                                                <img src={song.artwork} alt={song.album} className='w-ful h-full object-cover' />
+                                            ) : (
+                                                <Music size={20} className='text-muted-text' />
+                                            )}
+                                        </div>
+                                        <div className='flex-1 min-w-0'>
+                                            <p className='text-cream-text font-semibold truncate'>
+                                                {song.title}
+                                            </p>
+                                            <p className='text-sm text-muted-text truncate'>
+                                                {song.artist} • {song.album}
+                                            </p>
+                                        </div>
+                                        <span className='text-sm text-muted-text'>
+                                            {song.duration ? `${Math.floor(song.duration / 60)}:${String(Math.floor(song.duration % 60)).padStart(2, '0')}` : '--:--'}
+                                        </span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                setContextMenu({
+                                                    x: rect.left - 210,
+                                                    y: rect.top,
+                                                    song: song
+                                                });
+                                            }}
+                                            className='w-8 h-8 flex items-center justify-center text-muted-text hover:text-cream-text opacity-0 group-hover:opacity-100 transition'
+                                        >
+                                            <MoreVertical size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                                {filteredSongs.length > 10 && (
+                                    <p className='text-sm text-muted-text text-center py-2'>
+                                        Showing 10 of {filteredSongs.length} songs
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Albums Section */}
+                    {filteredAlbums.length > 0 && (
+                        <div className='mb-8'>
+                            <h4 className='text-xl font-semiboldtext-cream-text mb-4'>
+                                Albums
+                                <span className='text-sm text-muted-text ml-3'>
+                                    {filteredAlbums.length} {filteredAlbums.length === 1 ? 'album' : 'albums'}
+                                </span>
+                            </h4>
+                            <div className='grid grid-cols-4 gap-6'>
+                                {filteredAlbums.map((album, index) => (
+                                    <div
+                                        key={index}
+                                        onClick={() => setCurrentView(`album-${encodeURIComponent(album.name)}`)}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            setAlbumContextMenu({
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                album: album
+                                            });
+                                        }}
+                                        className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'
+                                    >
+                                        <div className='aspect-square rounded-lg mb-3 overflow-hidden bg-gradient-accent relative'>
+                                            {album.artwork ? (
+                                                <img src={album.artwork} alt={album.name} className='w-full h-full object-cover' />
+                                            ) : (
+                                                <div className='w-full h-full flex items-center justify-center'>
+                                                    <Disc3 size={48} className='text-muted-text' strokeWidth={1.5} />
+                                                </div>
+                                            )}
+                                            <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                                <button
+                                                    onClick={(e) {
+                                                        e.stopPropagation();
+                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                        setAlbumContextMenu({
+                                                            x: rect.left,
+                                                            y: rect.bottom + 5,
+                                                            album: album
+                                                        });
+                                                    }}
+                                                    className='absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/80 transition z-10'
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handlePlayAlbum(album);
+                                                    }}
+                                                    className='absolute bottom-2 right-2 w-12 h-12 bg-primary-purple/90 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-primary-purple transition hover:scale-110 z-10'
+                                                >
+                                                    <Play size={20} className='ml-0.5' />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <h4 className='text-base font-semibold text-cream-text truncate mb-1'>{album.name}</h4>
+                                        <p className='text-sm text-muted-text truncate mb-1'>{album.artist}</p>
+                                        <p className='text-sm text-muted-text'>
+                                            {album.songs.length} {album.songs.length === 1 ? 'song' : 'songs'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Artists Section */}
+                    {filteredArtists.length > 0 && (
+                        <div className='mb-8'>
+                            <h4 className='text-xl font-semibold text-cream-text mb-4'>
+                                Artists
+                                <span className='text-sm text-muted-text ml-3'>
+                                    {filteredArtists.length} {filteredArtists.length === 1 ? 'artist' : 'artists'}
+                                </span>
+                            </h4>
+                            <div className='grid grid-cols-4 gap-6'>
+                                {filteredArtists.map((artist, index) => (
+                                    <div
+                                        key={index}
+                                        onClick={() => setCurrentView(`artist-${encodeURIComponent(artist.name)}`)}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            setArtistContextMenu({
+                                                x: e.clientX,
+                                                y: e.clientY,
+                                                artist:artist
+                                            });
+                                        }}
+                                        className='bg-surface-dark p-4 rounded-lg hover:bg-graphite transition cursor-pointer group'
+                                    >
+                                        <div className='aspect-square rounded-lg mb-3 overflow-hidden bg-gradient-accent relative'>
+                                            {artist.artwork ? (
+                                                <img src={artist.artwork} alt={artist.name} className='w-full h-full object-cover' />
+                                            ) : (
+                                                <div className='w-full h-full flex items-center justify-center'>
+                                                    <Mic2 size={48} className='text-muted-text' strokeWidth={1.5} />
+                                                </div>
+                                            )}
+                                            <div className='absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const rect = e.currentTarget.getBoundingClientRect();
+                                                        setArtistContextMenu({
+                                                            x: rect.left,
+                                                            y: rect.bottom + 5.
+                                                            artist: artist
+                                                        });
+                                                    }}
+                                                    className='absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/80 transition z-10'
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handlePlayArtist(artist);
+                                                    }}
+                                                    className='absolute bottom-2 right-2 w-12 h-12 bg-primary-purple/90 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-primary-purple transition hover:scale-110 z-10'
+                                                >
+                                                    <Play size={20} className='ml-0.5' />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <h4 className='text-base font-semibold text-cream-text truncate mb-1'>
+                                            {artist.name}
+                                        </h4>
+                                        <p className='text-sm text-muted-text'>
+                                            {artist.songs.length} {artist.songs.length === 1 ? 'song' : 'songs'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Song Context Menu */}
+            {songContextMenu && (
+                <ContextMenu
+                    x={songContextMenu.x}
+                    y={songContextMenu.y}
+                    onClose={() => setSongContextMenu(null)}
+                >
+                    {playlists.length > 0 ? (
+                        <>
+                            <div className='px-4 py-2 text-xs text-muted-text uppercase tracking-wide'>
+                                Add to Playlist
+                            </div>
+                            <ContextMenuItem
+                                onClick={() => {
+                                    const playlistName = prompt('Enter playlist name:');
+                                    if (playlistName && playlistName.trim()) {
+                                        const newPlaylist = createPlaylist(playlistName.trim());
+                                        addToPlaylist(newPlaylist.id, songContextMenu.song);
+                                        setToast(`Created '${playlistName}' and added '${songContextMenu.song.title}'`);
+                                        setSongContextMenu(null);
+                                    }
+                                }}
+                            >
+                                + Create New Playlist
+                            </ContextMenuItem>
+                            <ContextMenuDivider />
+                            
+                        </>
+                    )}
+                </ContextMenu>
+            )}
+
+
+        </div>
+    )
+
+}
+
 export default MainContent;

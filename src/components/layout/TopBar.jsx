@@ -8,7 +8,37 @@ function TopBar() {
         <div className="h-16 bg-surface-dark border-b border-graphite flex items-center justify-between px-6">
             {/* Left: Search placeholder */}
             <div className="flex-1 max-w-2xl">
-                <div className='relative'>
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                        setCurrentView('search');
+                    }
+                }}
+                >
+                    <div className='relative'>
+                        <Search size={20} className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-text' strokeWidth={.5} />
+                        <input
+                            type='text'
+                            placeholder='Search songs, albums, artists...'
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className='w-96 pl-10 pr-10 py-2 bg-surface-dark border border-graphite rounded-lg text-cream-text placeholder-muted-text focus:outline-none focus:border-primary-purple transition'
+                        />
+                        {searchQuery && (
+                            <button
+                                type='button'
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setCurrentView('albums');
+                                }}
+                                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-text hover:text-cream-text transition'
+                            >
+                                x
+                            </button>
+                        )}
+                    </div>
+                </form>
+                {/* <div className='relative'>
                     <div className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-text'>
                         <Search size={20} />
                     </div>
@@ -27,7 +57,7 @@ function TopBar() {
                             x
                         </button>
                     )}
-                </div>
+                </div> */}
             </div>
 
             {/* Right: Settings placeholder */}
