@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useMusic } from '../../context/MusicContext';
 import { usePlayer } from '../../context/PlayerContext';
 import ContextMenu, { ContextMenuItem, ContextMenuDivider } from '../ui/ContextMenu';
-import { MoreVertical, Play as PlayIcon, Play, Disc3, Mic2, Radio, ListMusic, Music } from 'lucide-react';
+import { MoreVertical, Play as PlayIcon, Play, Disc3, Mic2, ListMusic, Music } from 'lucide-react';
 import Toast from '../ui/Toast';
 import AlbumsView from '../views/AlbumsView';
 import ArtistsView from '../views/ArtistsView';
+import GenresView from '../views/GenresView';
 
 function MainContent() {
     const { currentView, playlists } = useMusic();
@@ -72,19 +73,6 @@ function MainContent() {
                 </div>
 
                 {renderView()}
-            </div>
-        </div>
-    )
-}
-
-function GenresView() {
-    return (
-        <div>
-            <h3 className='text-2xl font-semibold text-cream-text mb-4'>Genres</h3>
-            <div className='text-center py-12'>
-                <Radio size={64} className='mx-auto mb-4 text-muted-text' strokeWidth={1.5} />
-                <p className='text-xl text-muted-text mb-2'>Genre view coming soon!</p>
-                <p className='text-sm text-muted-text'>We'll organize your music by genre here</p>
             </div>
         </div>
     )
