@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { useMusic } from '../../context/MusicContext';
 import { usePlayer } from '../../context/PlayerContext';
-import ContextMenu, { ContextMenuItem, ContextMenuDivider } from '../ui/ContextMenu';
-import { MoreVertical, Play as PlayIcon, Play, Disc3, Mic2, Music } from 'lucide-react';
-import Toast from '../ui/Toast';
+import { Music } from 'lucide-react';
 import AlbumsView from '../views/AlbumsView';
 import ArtistsView from '../views/ArtistsView';
 import GenresView from '../views/GenresView';
